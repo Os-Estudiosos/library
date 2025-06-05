@@ -1,21 +1,4 @@
 import psycopg2
-from library.database import Connection
-
-class CRUD(Connection.initialize):
-    def __init__(self):
-        return ""
-    
-    def create(self, table_name, *values):
-        return ""
-    
-    def read(self, table_name):
-        return ""
-    
-    def update(self, table_name, *values):
-        return ""
-    
-    def delete(self, table_name, *values):
-        return ""
 
 # - Inserir ou atualizar cliente:
 def upsert_cliente(cursor, cliente_id, cliente_nome, cliente_cep):
