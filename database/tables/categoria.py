@@ -1,6 +1,8 @@
 from database import Connection
 from database.tables import Table
 
+# TODO: Filtro
+
 class CategoriaTable(Connection.initialize):
     
     def __init__(self, db_name, path, owner):
@@ -22,11 +24,15 @@ class CategoriaTable(Connection.initialize):
             self.conn.rollback()
             print("Erro ao inserir:", e)
 
-# TODO: Filtro
     def read(self, qtd=15, filter=None):
         dict = {}
         try:
             total_registros = self.conn.cursor().execute("SELECT COUNT(*) FROM Categoria;").fetchone()[0]
+            if qtd <= 0:
+                print("Quantidade de registros por página deve ser maior que zero.")
+                return {}
+            if qtd > total_registros:
+                qtd = total_registros
             registros_por_pagina = qtd
             total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
             dict["total_registros"] = total_registros

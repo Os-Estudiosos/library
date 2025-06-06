@@ -1,0 +1,12 @@
+DROP TABLE AutorLivro;
+DROP TABLE AlFavoritaLiv;
+DROP TABLE LiPertenceCat;
+DROP TABLE Reserva;
+DROP TABLE Suspensao;
+DROP TABLE Emprestimo;
+DROP TABLE Aluno;
+DROP TABLE Livro;
+DROP TABLE Atendente;
+DROP TABLE Grupo;
+DROP TABLE Categoria;
+DROP TABLE Turma;
