@@ -1,0 +1,114 @@
+CREATE TABLE Turma
+(
+  IdTurma INT NOT NULL,
+  NomeTurma VARCHAR NOT NULL,
+  PRIMARY KEY (IdTurma)
+);
+
+CREATE TABLE Categoria
+(
+  IdCat INT NOT NULL,
+  NomeCat VARCHAR NOT NULL,
+  PRIMARY KEY (IdCat)
+);
+
+CREATE TABLE Grupo
+(
+  IdGru INT NOT NULL,
+  NomeGru VARCHAR NOT NULL,
+  PRIMARY KEY (IdGru)
+);
+
+CREATE TABLE Atendente
+(
+  CPFAtt VARCHAR NOT NULL,
+  PrimeiroNomeAtt VARCHAR NOT NULL,
+  UltimoNomeAtt VARCHAR NOT NULL,
+  PRIMARY KEY (CPFAtt)
+);
+
+CREATE TABLE Livro
+(
+  ISBNLiv VARCHAR NOT NULL,
+  NomeLiv VARCHAR NOT NULL,
+  EditoraLiv VARCHAR NOT NULL,
+  EdicaoLiv INT NOT NULL,
+  AnoLancamentoLiv DATE NOT NULL,
+  IdGru INT,
+  PRIMARY KEY (ISBNLiv),
+  FOREIGN KEY (IdGru) REFERENCES Grupo(IdGru)
+);
+
+CREATE TABLE Aluno
+(
+  MatriculaAl VARCHAR NOT NULL,
+  PrimeiroNomeAl VARCHAR NOT NULL,
+  UltimoNomeAl VARCHAR NOT NULL,
+  DataNascimentoAl DATE NOT NULL,
+  SenhaAl VARCHAR NOT NULL,
+  IdTurma INT NOT NULL,
+  PRIMARY KEY (MatriculaAl),
+  FOREIGN KEY (IdTurma) REFERENCES Turma(IdTurma)
+);
+
+CREATE TABLE Emprestimo
+(
+  IdEmp INT NOT NULL,
+  DataInicioEmp DATE NOT NULL,
+  DataFimEmp DATE NOT NULL,
+  BaixaEmp INT NOT NULL,
+  MatriculaAl VARCHAR NOT NULL,
+  ISBNLiv VARCHAR NOT NULL,
+  CPFAtt VARCHAR NOT NULL,
+  PRIMARY KEY (IdEmp, MatriculaAl),
+  FOREIGN KEY (MatriculaAl) REFERENCES Aluno(MatriculaAl),
+  FOREIGN KEY (ISBNLiv) REFERENCES Livro(ISBNLiv),
+  FOREIGN KEY (CPFAtt) REFERENCES Atendente(CPFAtt)
+);
+
+CREATE TABLE Suspensao
+(
+  IdSusp INT NOT NULL,
+  DataInicioSusp DATE NOT NULL,
+  DataFimSusp DATE NOT NULL,
+  MatriculaAl VARCHAR NOT NULL,
+  PRIMARY KEY (IdSusp, MatriculaAl),
+  FOREIGN KEY (MatriculaAl) REFERENCES Aluno(MatriculaAl)
+);
+
+CREATE TABLE Reserva
+(
+  IdRes INT NOT NULL,
+  DataRes DATE NOT NULL,
+  MatriculaAl VARCHAR NOT NULL,
+  ISBNLiv VARCHAR NOT NULL,
+  PRIMARY KEY (IdRes, MatriculaAl),
+  FOREIGN KEY (MatriculaAl) REFERENCES Aluno(MatriculaAl),
+  FOREIGN KEY (ISBNLiv) REFERENCES Livro(ISBNLiv)
+);
+
+CREATE TABLE LiPertenceCat
+(
+  ISBNLiv VARCHAR NOT NULL,
+  IdCat INT NOT NULL,
+  PRIMARY KEY (ISBNLiv, IdCat),
+  FOREIGN KEY (ISBNLiv) REFERENCES Livro(ISBNLiv),
+  FOREIGN KEY (IdCat) REFERENCES Categoria(IdCat)
+);
+
+CREATE TABLE AlFavoritaLiv
+(
+  ISBNLiv VARCHAR NOT NULL,
+  MatriculaAl VARCHAR NOT NULL,
+  PRIMARY KEY (ISBNLiv, MatriculaAl),
+  FOREIGN KEY (ISBNLiv) REFERENCES Livro(ISBNLiv),
+  FOREIGN KEY (MatriculaAl) REFERENCES Aluno(MatriculaAl)
+);
+
+CREATE TABLE AutorLivro
+(
+  AutorLiv VARCHAR NOT NULL,
+  ISBNLiv VARCHAR NOT NULL,
+  PRIMARY KEY (AutorLiv, ISBNLiv),
+  FOREIGN KEY (ISBNLiv) REFERENCES Livro(ISBNLiv)
+);

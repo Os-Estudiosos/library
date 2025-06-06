@@ -13,3 +13,6 @@ class Table(ABC):
 
     @abstractmethod
     def delete(self, *values): ...
+
+    @abstractmethod
+    def close(self): ...

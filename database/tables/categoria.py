@@ -1,4 +1,3 @@
-import psycopg2
 from database import Connection
 from database.tables import Table
 
@@ -52,10 +51,13 @@ class CategoriaTable(Connection.initialize):
         except Exception as e:
             self.conn.rollback()
             print("Erro ao excluir:", e)
-            
-    # def close(self):
-    #     if self.conn:
-    #         self.conn.close()
-    #         print("Conexão fechada com sucesso.")
-    #     else:
-    #         print("Nenhuma conexão para fechar.")
+
+    def close(self):
+        if self.conn:
+            try:
+                self.conn.close()
+                print("Conexão fechada com sucesso.")
+            except Exception as e:
+                print("Erro ao fechar a conexão:", e)
+        else:
+            print("Nenhuma conexão para fechar.")

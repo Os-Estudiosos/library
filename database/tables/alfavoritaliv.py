@@ -1,6 +1,6 @@
 import psycopg2
-from library.database import Connection
-from library.database.tables import Table
+from database import Connection
+from database.tables import Table
 
 class Alfavoritaliv(Connection.initialize):
     def __init__(self, db_name, path, owner):
