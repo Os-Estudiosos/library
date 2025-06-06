@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import platform
 from typing import Any
 
 from gui.screens.login import Login
@@ -29,6 +30,11 @@ class Application(ctk.CTk):
             "page": self.default,
             "arguments": arguments
         })
+
+        if platform.system() == "Windows":
+            self.state("zoomed")
+        else:
+            self.attributes("-zoomed", True)
     
     def go_back(self):
         self.screens[self.history[-2]["page"]].build(self.history[-2]["arguments"])
