@@ -4,6 +4,7 @@ from typing import Any
 
 from gui.screens.login import Login
 from gui.screens.home import Home
+from gui.screens.layout import Layout
 
 
 class Application(ctk.CTk):
@@ -15,8 +16,12 @@ class Application(ctk.CTk):
             "login": Login(self),
             "home": Home(self)
         }
+        self.layout = Layout(self)
         self.default = "home"
         self.history = []
+
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
     
     def delete_previous_screen(self):
         """Destroy the elements of the previous page
@@ -25,6 +30,7 @@ class Application(ctk.CTk):
             i.destroy()
     
     def initialize(self, arguments=None):
+        self.layout.build()
         self.screens[self.default].build(arguments)
         self.history.append({
             "page": self.default,
@@ -37,6 +43,8 @@ class Application(ctk.CTk):
             self.attributes("-zoomed", True)
     
     def go_back(self):
+        self.delete_previous_screen()
+        self.layout.build()
         self.screens[self.history[-2]["page"]].build(self.history[-2]["arguments"])
         self.history.pop()
     
@@ -52,4 +60,5 @@ class Application(ctk.CTk):
             "page": screen,
             "arguments": arguments
         })
+        self.layout.build()
         self.screens[screen].build(arguments)
