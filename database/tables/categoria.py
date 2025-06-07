@@ -1,8 +1,6 @@
 from database import Connection
 from database.tables import Table
 
-# TODO: Filtro
-
 class CategoriaTable(Connection.initialize):
     
     def __init__(self, db_name, path, owner):
@@ -40,10 +38,10 @@ class CategoriaTable(Connection.initialize):
             dict["total_paginas"] = total_paginas
             sql = f"SELECT {qtd} FROM Categoria"
             if filter:
-                sql += f" WHERE {filter}"
+                sql += f" WHERE {[f'{k} = %s' for k in filter.keys()]}"
             sql += ";"            
             dict["pagina_atual"] = 1
-            dict["registros"] = [self.conn.cursor().execute(sql).fetchall()]
+            dict["registros"] = [self.conn.cursor().execute(sql, tuple(filter.values())).fetchall()]
             return dict
         except Exception as e:
             print("Erro ao ler:", e)
