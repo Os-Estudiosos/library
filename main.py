@@ -12,7 +12,8 @@ from gui.screens.emprestimos import Loans
 from gui.screens.grupos import Groups
 from gui.screens.reservas import Reserves
 from gui.screens.suspensoes import Suspensions
-from gui.screens.turma import Classes
+
+from gui.screens.turma import Classes, EditClass, CreateClass, SeeClass
 
 # Configurations
 from config.database import *
@@ -35,7 +36,11 @@ if __name__ == "__main__":
         "groups": Groups(app.layout.frame),
         "reserves": Reserves(app.layout.frame),
         "suspensions": Suspensions(app.layout.frame),
+
         "classes": Classes(app.layout.frame),
+        "edit_classes": EditClass(app.layout.frame),
+        "create_class": CreateClass(app.layout.frame),
+        "see_class": SeeClass(app.layout.frame)
     }
     RouteManager.app = app
 

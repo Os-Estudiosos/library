@@ -6,6 +6,7 @@ from config.colors import Colors
 from gui.manager.routemanager import RouteManager
 
 from gui.screens.components.table import Table
+from gui.screens.components.input import Input
 
 
 class Students(Screen):
@@ -84,7 +85,7 @@ class Students(Screen):
 
         students = pd.read_csv("gui/screens/csv/students.csv")
 
-        table = Table(self.app, "edit_students")
+        table = Table(self.app, "edit_students", "see_student")
         table.build(students)
 
 
@@ -94,7 +95,6 @@ class EditStudent(Screen):
     
     def build(self, *args, **kwargs):
         student: pd.Series = args[0]
-        print(student)
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -195,3 +195,15 @@ class CreateStudent(Screen):
 
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
+
+        forms_frame = Input(
+            master=self.app,
+            fg_color="#f043f2"
+        )
+        forms_frame.grid(row=1, column=0, sticky="nswe")
+
+        entry = ctk.CTkEntry(
+            forms_frame,
+            placeholder_text="Teste"
+        )
+        entry.grid(row=0, column=0)

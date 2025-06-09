@@ -6,6 +6,38 @@ from gui.manager.routemanager import RouteManager
 from utils.word import wrap_text
 
 
+class SeeButton:
+    def __init__(
+        self,
+        route,
+        route_arguments,
+        master
+    ):
+        self.route = route
+        self.master = master
+
+        def on_click():
+            RouteManager.go_to(route, route_arguments)
+
+        self.image = ctk.CTkImage(
+            light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "eye-icon.png")),
+            size=(20, 20)
+        )
+
+        self.__button = ctk.CTkButton(
+            self.master,
+            command=on_click,
+            fg_color=Colors.EMERALD.c_600,
+            hover_color=Colors.EMERALD.c_700,
+            image=self.image,
+            text="",
+            width=25,
+            height=25
+        )
+    
+    def grid(self, **kwargs):
+        self.__button.grid(**kwargs)
+
 class EditButton:
     def __init__(
         self,

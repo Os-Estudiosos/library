@@ -1,13 +1,14 @@
 import customtkinter as ctk
 import pandas as pd
 from config.colors import Colors
-from gui.screens.components.actions import EditButton, TrashButton
+from gui.screens.components.actions import EditButton, TrashButton, SeeButton
 
 
 class Table:
-    def __init__(self, master, go_on_edit):
+    def __init__(self, master, go_on_edit, go_on_see):
         self.app = master
         self.go_on_edit = go_on_edit
+        self.go_on_see = go_on_see
     
     def build(self, table: pd.DataFrame):
         upper_frame = ctk.CTkFrame(self.app, fg_color=Colors.GRAY.c_50)  # Criando o frame da tabela inteira
@@ -93,16 +94,18 @@ class Table:
             actions_frame.grid(row=i+1, column=j+1, sticky="ew")  # Posicionando ele na grid
 
             actions_frame.columnconfigure(0, weight=1)
-            actions_frame.columnconfigure(1, weight=1)
+            actions_frame.columnconfigure(2, weight=1)
             actions_frame.rowconfigure(0, weight=1)
 
+            see_button = SeeButton(self.go_on_see, datapoint[1], actions_frame)
+            see_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
             edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
-            edit_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
+            edit_button.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
             trash_icon = TrashButton((
                 "SUBSTITUIR PELA TABELA POSTERIORMENTE",
                 datapoint[1]
             ), actions_frame)
-            trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
+            trash_icon.grid(row=0, column=2, pady=5, padx=5, sticky="w")
 
         frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         upper_frame.grid(row=1, column=0, sticky="ew", padx=20)
