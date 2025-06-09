@@ -3,6 +3,8 @@ import customtkinter as ctk
 import pandas as pd
 from config.colors import Colors
 
+from gui.manager.routemanager import RouteManager
+
 from gui.screens.components.table import Table
 
 
@@ -51,7 +53,7 @@ class Students(Screen):
             font=("Arial", 14, "bold"),
             fg_color=Colors.INDIGO.c_600,
             hover_color=Colors.INDIGO.c_700,
-            command=lambda: print("Adicionar"),
+            command=lambda: RouteManager.go_to("create_student"),
             width=100,
             corner_radius=10
         )
@@ -80,23 +82,116 @@ class Students(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        students = pd.read_csv("gui/screens/students.csv")
+        students = pd.read_csv("gui/screens/csv/students.csv")
 
         table = Table(self.app, "edit_students")
         table.build(students)
 
 
-class EditStudents(Screen):
+class EditStudent(Screen):
     def __init__(self, app):
         self.app = app
     
     def build(self, *args, **kwargs):
-        label = ctk.CTkLabel(
+        student: pd.Series = args[0]
+        print(student)
+
+        title_frame = ctk.CTkFrame(
             self.app,
-            text="Editar Aluno"
+            fg_color="transparent"
         )
-        label.grid(column=0, row=0)
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        title = ctk.CTkLabel(
+            title_frame,
+            text="Editar Aluno",
+            font=("Arial", 20, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        title.grid(column=0, row=0, sticky="w")
+
+        description = ctk.CTkLabel(
+            title_frame,
+            text=f"Você está editando o(a) aluno(a) {student.primeironomeal+" "+student.ultimonomeal} de matricula {student.matriculaal}",
+            font=("Arial", 15, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        description.grid(column=0, row=1, sticky="w")
+
+        cancel_button = ctk.CTkButton(
+            title_frame,
+            command=lambda: RouteManager.go_back(),
+            fg_color="#ffffff",
+            hover_color=Colors.GRAY.c_100,
+            text_color=Colors.GRAY.c_800,
+            border_color=Colors.GRAY.c_300,
+            border_width=1,
+            text="Cancelar",
+            font=("Arial", 13, "bold"),
+            width=100,
+            corner_radius=10
+        )
+        cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
+
+        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
+
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        student: pd.Series = args[0]
+
+class CreateStudent(Screen):
+    def __init__(self, app):
+        self.app = app
+    
+    def build(self, *args, **kwargs):
+        title_frame = ctk.CTkFrame(
+            self.app,
+            fg_color="transparent"
+        )
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        title = ctk.CTkLabel(
+            title_frame,
+            text="Criar Aluno",
+            font=("Arial", 20, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        title.grid(column=0, row=0, sticky="w")
+
+        description = ctk.CTkLabel(
+            title_frame,
+            text="Você vai criar um registro de aluno, insira as informações e clique em INSERIR",
+            font=("Arial", 15, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        description.grid(column=0, row=1, sticky="w")
+
+        cancel_button = ctk.CTkButton(
+            title_frame,
+            command=lambda: RouteManager.go_back(),
+            fg_color="#ffffff",
+            hover_color=Colors.GRAY.c_100,
+            text_color=Colors.GRAY.c_800,
+            border_color=Colors.GRAY.c_300,
+            border_width=1,
+            text="Cancelar",
+            font=("Arial", 13, "bold"),
+            width=100,
+            corner_radius=10
+        )
+        cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
+
+        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
+
+        self.app.grid_rowconfigure(1, weight=1)
+        self.app.grid_columnconfigure(0, weight=1)

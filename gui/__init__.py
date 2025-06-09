@@ -25,7 +25,7 @@ class Application(ctk.CTk):
     
     def initialize(self, arguments=None):
         self.layout.build()  # Construindo o layout logo na inicialização
-        RouteManager.routes[RouteManager.default].build(arguments)
+        RouteManager.go_to(RouteManager.default)
 
         if platform.system() == "Windows":
             self.state("zoomed")

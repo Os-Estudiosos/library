@@ -12,9 +12,19 @@ class RouteManager:
         cls.active = active
     
     @classmethod
+    def go_back(cls):
+        cls.history.pop()
+        cls.routes[cls.history[-1]["route"]].build(cls.history[-1]["arguments"])
+        cls.change_active(cls.history[-1]["route"])
+    
+    @classmethod
     def go_to(cls, route, arguments=None):
         cls.change_active(route)
         cls.app.delete_previous_screen()
         cls.app.layout.build()
         cls.routes[route].build(arguments)
+        cls.history.append({
+            "route": route,
+            "arguments": arguments
+        })
         
