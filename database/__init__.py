@@ -7,23 +7,34 @@ class Connection:
         self.user = user
         self.host = host
         self.password = password
+        self.conn = None
     
-    def __str__(self):
-        return f"O banco de dados {self.db_name} está sendo usado por {self.user} e tem o caminho {self.path}"
-  
     def initialize(self):
         try:
-            conn = psycopg2.connect(
+            self.conn = psycopg2.connect(
                 dbname=self.db_name,
                 user=self.user,
                 password=self.password,  
                 host=self.host,
                 port="5432"
             )
-
-            conn.cursor().execute(f"SET search_path TO {self.path};")
-            conn.commit() 
-            return conn
+            self.conn.cursor().execute(f"SET search_path TO {self.path};")
+            self.conn.commit() 
         except Exception as e:
             print("Erro ao conectar ao banco de dados:", e)
-            return None
+            self.conn = None
+    
+    def cursor(self):
+        return self.conn.cursor() if self.conn else None
+
+    def commit(self):
+        if self.conn:
+            self.conn.commit()
+
+    def rollback(self):
+        if self.conn:
+            self.conn.rollback()
+
+    def close(self):
+        if self.conn:
+            self.conn.close()
