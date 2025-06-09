@@ -1,5 +1,4 @@
 from database import Connection
-from database.tables import Table
 
 class ReservaTable:
     
@@ -12,17 +11,19 @@ class ReservaTable:
         try:
             sql = f"""
             INSERT INTO {self.name} {self.values} VALUES (%s, %s, %s, %s)
-            ON CONFLICT (IdRes) DO UPDATE SET
+            ON CONFLICT (IdRes, MatriculaAl) DO UPDATE SET
             DataRes = EXCLUDED.DataRes,
-            MatriculaAl = EXCLUDED.MatriculaAl,
             ISBNLiv = EXCLUDED.ISBNLiv;
             """
-            self.conn.cursor().execute(sql, (id_res, data_res, matricula_al, isbn_liv))
+            cursor = self.conn.cursor()
+            cursor.execute(sql, (id_res, data_res, matricula_al, isbn_liv))
             self.conn.commit()
             print(f"{self.name} inserida com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao inserir:", e)
+        finally:
+            cursor.close()
 
     def read(self, qtd=15, pagina=1, filter=None):
         dict = {}
@@ -63,26 +64,35 @@ class ReservaTable:
 
     def update(self, id_res, data_res, matricula_al, isbn_liv):
         try:
-            sql = f"UPDATE {self.name} SET DataRes = %s, MatriculaAl = %s, ISBNLiv = %s WHERE IdRes = %s;"
-            self.conn.cursor().execute(sql, (data_res, matricula_al, isbn_liv, id_res))
+            sql = f"UPDATE {self.name} SET DataRes = %s, ISBNLiv = %s WHERE IdRes = %s AND MatriculaAl = %s;"
+            cursor = self.conn.cursor()
+            cursor.execute(sql, (data_res, isbn_liv, id_res, matricula_al))
+            if cursor.rowcount == 0:
+                print(f"{self.name} com IdRes {id_res} e MatriculaAl {matricula_al} não encontrada.")
+                return
             self.conn.commit()
             print(f"{self.name} atualizada com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao atualizar:", e)
+        finally:
+            cursor.close()
 
     def delete(self, id_res, matricula_al):
         try:
             sql = f"DELETE FROM {self.name} WHERE IdRes = %s AND MatriculaAl = %s;"
-            self.conn.cursor().execute(sql, (id_res, matricula_al))
-            if self.conn.cursor().rowcount == 0:
-                print(f"{self.name} com ID {id_res} e Matrícula {matricula_al} não encontrada.")
+            cursor = self.conn.cursor()
+            cursor.execute(sql, (id_res, matricula_al))
+            if cursor.rowcount == 0:
+                print(f"{self.name} com IdRes {id_res} e MatriculaAl {matricula_al} não encontrada.")
                 return
             self.conn.commit()
             print(f"{self.name} excluída com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao excluir:", e)
+        finally:
+            cursor.close()
 
     def close(self):
         if self.conn:
