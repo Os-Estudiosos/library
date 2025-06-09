@@ -1,11 +1,10 @@
 from database import Connection
 from database.tables import Table
 
-class LivroTable(Connection.initialize):
+class LivroTable:
     
-    def __init__(self, db_name, path, owner):
-        super().__init__(db_name, path, owner)
-        self.conn = self.initialize()
+    def __init__(self, connection:Connection):
+        self.conn = connection
         self.values = "(ISBNLiv, NomeLiv, EditoraLiv, EdicaoLiv, AnoLancamentoLiv, IdGru)"
         self.name = "Livro"
 

@@ -1,11 +1,10 @@
 from database import Connection
 from database.tables import Table
 
-class AutorLivroTable(Connection.initialize):
+class AutorLivroTable:
     
-    def __init__(self, db_name, path, owner):
-        super().__init__(db_name, path, owner)
-        self.conn = self.initialize()
+    def __init__(self, connection:Connection):
+        self.conn = connection
         self.values = "(AutorLiv, ISBNLiv)"
         self.name = "AutorLivro"
 
