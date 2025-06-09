@@ -4,8 +4,7 @@ from gui.manager.routemanager import RouteManager
 
 # Routes
 from gui.screens.alunos import Students, EditStudent, CreateStudent
-
-from gui.screens.livros import Books
+from gui.screens.livros import Books, EditBook, CreateBook
 from gui.screens.atendentes import Secretaries
 from gui.screens.categorias import Categories
 from gui.screens.emprestimos import Loans
@@ -30,6 +29,9 @@ if __name__ == "__main__":
         "create_student": CreateStudent(app.layout.frame),
 
         "books": Books(app.layout.frame),
+        "edit_books": EditBook(app.layout.frame),
+        "create_book": CreateBook(app.layout.frame),
+
         "secretaries": Secretaries(app.layout.frame),
         "categories": Categories(app.layout.frame),
         "loans": Loans(app.layout.frame),
