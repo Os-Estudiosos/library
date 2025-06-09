@@ -86,7 +86,16 @@ class Students(Screen):
         students = pd.read_csv("gui/screens/csv/students.csv")
 
         table = Table(self.app, "edit_students", "see_student")
-        table.build(students)
+
+        pagination = {
+            "registros": students.head(10),
+            "total_registros": 30,
+            "registros_por_pagina": 10,
+            "total_paginas": 3,
+            "pagina_atual": 1
+        }
+
+        table.build(pagination)
 
 
 class EditStudent(Screen):

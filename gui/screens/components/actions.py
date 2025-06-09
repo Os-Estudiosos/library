@@ -21,7 +21,7 @@ class SeeButton:
 
         self.image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "eye-icon.png")),
-            size=(20, 20)
+            size=(16, 16)
         )
 
         self.__button = ctk.CTkButton(
@@ -53,7 +53,7 @@ class EditButton:
 
         self.image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "edit-icon.png")),
-            size=(20, 20)
+            size=(16, 16)
         )
 
         self.__button = ctk.CTkButton(
@@ -79,7 +79,7 @@ class TrashButton:
 
         self._image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "trash-icon.png")),
-            size=(20, 20)
+            size=(16, 16)
         )
 
         self.__button = ctk.CTkButton(

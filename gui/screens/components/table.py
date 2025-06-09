@@ -1,7 +1,9 @@
 import customtkinter as ctk
 import pandas as pd
 from config.colors import Colors
+
 from gui.screens.components.actions import EditButton, TrashButton, SeeButton
+from gui.screens.components.pagination import Pagination
 
 
 class Table:
@@ -10,7 +12,9 @@ class Table:
         self.go_on_edit = go_on_edit
         self.go_on_see = go_on_see
     
-    def build(self, table: pd.DataFrame):
+    def build(self, pagination):
+        table = pagination["registros"]
+
         upper_frame = ctk.CTkFrame(self.app, fg_color=Colors.GRAY.c_50)  # Criando o frame da tabela inteira
         upper_frame.rowconfigure(0, weight=1)
         upper_frame.columnconfigure(0, weight=1)
@@ -58,7 +62,7 @@ class Table:
         # Linha de divisão entre cabeçalho e linhas
         line = ctk.CTkFrame(
             frame,
-            fg_color=Colors.GRAY.c_600,
+            fg_color=Colors.GRAY.c_400,
             height=2
         )
         line.grid(row=1, column=0, columnspan=j+2, sticky="ew")
@@ -106,6 +110,28 @@ class Table:
                 datapoint[1]
             ), actions_frame)
             trash_icon.grid(row=0, column=2, pady=5, padx=5, sticky="w")
+
+        line = ctk.CTkFrame(
+            frame,
+            fg_color=Colors.GRAY.c_400,
+            height=2
+        )
+        line.grid(row=datapoint[0]+3, column=0, columnspan=j+2, sticky="ew")
+
+        pagination_frame = ctk.CTkFrame(
+            frame,
+            fg_color="transparent",
+        )
+        pagination_frame.grid(row=datapoint[0]+4, column=0, columnspan=j+2, sticky="nsew", pady=(5,0))
+
+        pagination_frame.columnconfigure(0, weight=1)
+        pagination_frame.columnconfigure(1, weight=1)
+
+        pagination_widget = Pagination(
+            pagination_frame,
+            pagination
+        )
+        pagination_widget.build()
 
         frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         upper_frame.grid(row=1, column=0, sticky="ew", padx=20)
