@@ -4,7 +4,7 @@ from database.tables.turma import TurmaTable
 
 class TestTurmaTable(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls): 
         cls.connection = Connection("livraria", "livraria", "thalis", "10.61.49.160", "thalis").initialize()
         cls.turma_table = TurmaTable(cls.connection)
 
@@ -50,7 +50,6 @@ class TestTurmaTable(unittest.TestCase):
         result = self.turma_table.read(filter={"IdTurma": next_id})
         self.assertEqual(len(result["registros"]), 1)
         self.assertEqual(result["registros"][0][0], next_id)
-        # Limpar
         self.turma_table.delete(next_id)
 
     def test_update_turma(self):
@@ -60,7 +59,6 @@ class TestTurmaTable(unittest.TestCase):
         self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (next_id,))
         result = self.turma_table.cursor.fetchone()
         self.assertEqual(result[0], "Turma Atualizada")
-        # Limpar
         self.turma_table.delete(next_id)
 
     def test_update_turma_inexistente(self):

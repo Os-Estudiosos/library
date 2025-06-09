@@ -5,7 +5,7 @@ class TurmaTable:
         self.conn = connection
         self.values = "(IdTurma, NomeTurma)"
         self.name = "Turma"
-        self.cursor = self.conn.cursor()  # Reutilizar o cursor para eficiência
+        self.cursor = self.conn.cursor()  
 
     def create(self, id_turma, nome_turma):
         try:
@@ -39,7 +39,6 @@ class TurmaTable:
             dict["total_paginas"] = total_paginas
             dict["pagina_atual"] = pagina
 
-            # Construir a query SQL com LIMIT e OFFSET
             offset = (pagina - 1) * qtd
             sql = f"SELECT * FROM {self.name} LIMIT %s OFFSET %s"
             params = (qtd, offset)
