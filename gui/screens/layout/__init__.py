@@ -3,6 +3,7 @@ import customtkinter as ctk
 from PIL import Image
 import os
 from config.colors import Colors
+from gui.manager.routemanager import RouteManager
 
 
 class Layout(Screen):
@@ -10,7 +11,7 @@ class Layout(Screen):
         self.app = app
 
         def btn_callback(route):
-            self.app.go_to(route)
+            RouteManager.go_to(route)
 
         self.options = [
             {
@@ -85,7 +86,7 @@ class Layout(Screen):
             state = "normal"
             color = "#fff"
             text_color = Colors.INDIGO.c_700
-            if option["route"] == self.app.active:
+            if option["route"] == RouteManager.active:
                 state = "disabled"
                 color = Colors.INDIGO.c_800
 
