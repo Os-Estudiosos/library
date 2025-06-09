@@ -69,24 +69,19 @@ class AlunoTable:
             params.extend([registros_por_pagina, offset])
             cursor.execute(sql, tuple(params))
             registros = cursor.fetchall()
-
             resultado.update({
                 "total_registros": total_registros,
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": registros,
-                "df": pd.DataFrame(registros, columns=[
-                    "Matricula", "Nome completo", "Data nascimento", "Turma"
+                "registros": pd.DataFrame(registros, columns=[
+                    "Matrícula", "Nome completo", "Data nascimento", "Turma"
                 ])
             })
             return resultado
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
-        finally:
-            if cursor:
-                cursor.close()
 
     def update(self, primary_key: dict, colums: dict):
         try:
