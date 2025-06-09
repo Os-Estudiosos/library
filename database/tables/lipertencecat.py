@@ -12,15 +12,21 @@ class LiPertenceCatTable:
         try:
             sql = f"""
             INSERT INTO {self.name} {self.values} VALUES (%s, %s)
-            ON CONFLICT (ISBNLiv, IdCat) DO UPDATE SET
-            IdCat = EXCLUDED.IdCat;
+            ON CONFLICT (ISBNLiv, IdCat) DO NOTHING;
             """
-            self.conn.cursor().execute(sql, (isbn_liv, id_cat))
-            self.conn.commit()
-            print(f"{self.name} inserida com sucesso.")
+            cursor = self.conn.cursor()
+            cursor.execute(sql, (isbn_liv, id_cat))
+            if cursor.rowcount > 0:
+                self.conn.commit()
+                print(f"{self.name} inserida com sucesso.")
+            else:
+                self.conn.rollback()
+                print(f"{self.name} já existe com ISBNLiv {isbn_liv} e IdCat {id_cat}.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao inserir:", e)
+        finally:
+            cursor.close()
 
     def read(self, qtd=15, pagina=1, filter=None):
         dict = {}
@@ -59,28 +65,59 @@ class LiPertenceCatTable:
             print("Erro ao ler:", e)
             return {}
 
-    def update(self, isbn_liv, id_cat):
+    def update(self, isbn_liv, id_cat_old, id_cat_new):
         try:
-            sql = f"UPDATE {self.name} SET IdCat = %s WHERE ISBNLiv = %s;"
-            self.conn.cursor().execute(sql, (id_cat, isbn_liv))
+            cursor = self.conn.cursor()
+            # Verifica se o registro antigo existe
+            sql_check_old = f"SELECT 1 FROM {self.name} WHERE ISBNLiv = %s AND IdCat = %s;"
+            cursor.execute(sql_check_old, (isbn_liv, id_cat_old))
+            if cursor.rowcount == 0:
+                print(f"{self.name} com ISBNLiv {isbn_liv} e IdCat {id_cat_old} não encontrada.")
+                return
+            
+            # Verifica se o novo registro já existe
+            sql_check_new = f"SELECT 1 FROM {self.name} WHERE ISBNLiv = %s AND IdCat = %s;"
+            cursor.execute(sql_check_new, (isbn_liv, id_cat_new))
+            if cursor.rowcount > 0:
+                print(f"{self.name} com ISBNLiv {isbn_liv} e IdCat {id_cat_new} já existe.")
+                # Exclui o registro antigo, já que o novo já existe
+                sql_delete = f"DELETE FROM {self.name} WHERE ISBNLiv = %s AND IdCat = %s;"
+                cursor.execute(sql_delete, (isbn_liv, id_cat_old))
+                self.conn.commit()
+                print(f"{self.name} atualizada com sucesso: IdCat {id_cat_old} removido, pois IdCat {id_cat_new} já existe.")
+                return
+            
+            # Exclui a relação antiga
+            sql_delete = f"DELETE FROM {self.name} WHERE ISBNLiv = %s AND IdCat = %s;"
+            cursor.execute(sql_delete, (isbn_liv, id_cat_old))
+            
+            # Insere a nova relação
+            sql_insert = f"INSERT INTO {self.name} {self.values} VALUES (%s, %s);"
+            cursor.execute(sql_insert, (isbn_liv, id_cat_new))
+            
             self.conn.commit()
-            print(f"{self.name} atualizada com sucesso.")
+            print(f"{self.name} atualizada com sucesso: IdCat alterado de {id_cat_old} para {id_cat_new}.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao atualizar:", e)
+        finally:
+            cursor.close()
 
     def delete(self, isbn_liv, id_cat):
         try:
             sql = f"DELETE FROM {self.name} WHERE ISBNLiv = %s AND IdCat = %s;"
-            self.conn.cursor().execute(sql, (isbn_liv, id_cat))
-            if self.conn.cursor().rowcount == 0:
-                print(f"{self.name} com ISBN {isbn_liv} e ID {id_cat} não encontrada.")
+            cursor = self.conn.cursor()
+            cursor.execute(sql, (isbn_liv, id_cat))
+            if cursor.rowcount == 0:
+                print(f"{self.name} com ISBNLiv {isbn_liv} e IdCat {id_cat} não encontrada.")
                 return
             self.conn.commit()
             print(f"{self.name} excluída com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao excluir:", e)
+        finally:
+            cursor.close()
 
     def close(self):
         if self.conn:
