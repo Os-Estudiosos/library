@@ -7,7 +7,7 @@ from gui.screens.components.pagination import Pagination
 
 
 class Table:
-    def __init__(self, master, go_on_edit, go_on_see):
+    def __init__(self, master, go_on_edit, go_on_see=None):
         self.app = master
         self.go_on_edit = go_on_edit
         self.go_on_see = go_on_see
@@ -97,19 +97,31 @@ class Table:
             )
             actions_frame.grid(row=i+1, column=j+1, sticky="ew")  # Posicionando ele na grid
 
-            actions_frame.columnconfigure(0, weight=1)
-            actions_frame.columnconfigure(2, weight=1)
-            actions_frame.rowconfigure(0, weight=1)
+            if self.go_on_see is not None:
+                actions_frame.columnconfigure(0, weight=1)
+                actions_frame.columnconfigure(2, weight=1)
+                actions_frame.rowconfigure(0, weight=1)
 
-            see_button = SeeButton(self.go_on_see, datapoint[1], actions_frame)
-            see_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
-            edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
-            edit_button.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
-            trash_icon = TrashButton((
-                "SUBSTITUIR PELA TABELA POSTERIORMENTE",
-                datapoint[1]
-            ), actions_frame)
-            trash_icon.grid(row=0, column=2, pady=5, padx=5, sticky="w")
+                see_button = SeeButton(self.go_on_see, datapoint[1], actions_frame)
+                see_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
+                edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
+                edit_button.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
+                trash_icon = TrashButton((
+                    "SUBSTITUIR PELA TABELA POSTERIORMENTE",
+                    datapoint[1]
+                ), actions_frame)
+                trash_icon.grid(row=0, column=2, pady=5, padx=5, sticky="w")
+            else:
+                actions_frame.columnconfigure(0, weight=1)
+                actions_frame.columnconfigure(1, weight=1)
+
+                edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
+                edit_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
+                trash_icon = TrashButton((
+                    "SUBSTITUIR PELA TABELA POSTERIORMENTE",
+                    datapoint[1]
+                ), actions_frame)
+                trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
 
         line = ctk.CTkFrame(
             frame,

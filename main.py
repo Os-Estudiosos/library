@@ -13,7 +13,7 @@ from gui.screens.grupos import Groups
 from gui.screens.reservas import Reserves
 from gui.screens.suspensoes import Suspensions
 
-from gui.screens.turma import Classes, EditClass, CreateClass, SeeClass
+from gui.screens.turma import Classes, EditClass, CreateClass
 
 # Configurations
 from config.database import *
@@ -40,7 +40,6 @@ if __name__ == "__main__":
         "classes": Classes(app.layout.frame),
         "edit_classes": EditClass(app.layout.frame),
         "create_class": CreateClass(app.layout.frame),
-        "see_class": SeeClass(app.layout.frame)
     }
     RouteManager.app = app
 

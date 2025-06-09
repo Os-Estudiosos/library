@@ -56,6 +56,7 @@ class Classes(Screen):
             hover_color=Colors.INDIGO.c_700,
             command=lambda: RouteManager.go_to("create_class"),
             width=100,
+            text_color="#fff",
             corner_radius=10
         )
         add_button.grid(column=0, row=0, ipady=5, padx=(0, 10), sticky="e")
@@ -84,8 +85,16 @@ class Classes(Screen):
 
         classes = pd.read_csv("gui/screens/csv/classes.csv")
 
-        table = Table(self.app, "edit_classes", "see_class")
-        table.build(classes)
+        pagination = {
+            "registros": classes.head(6),
+            "total_registros": 12,
+            "registros_por_pagina": 6,
+            "total_paginas": 2,
+            "pagina_atual": 1
+        }
+
+        table = Table(self.app, "edit_classes")
+        table.build(pagination)
 
 
 class EditClass(Screen):
@@ -136,61 +145,6 @@ class EditClass(Screen):
             corner_radius=10
         )
         cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
-
-        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
-
-        self.app.grid_rowconfigure(1, weight=1)
-        self.app.grid_columnconfigure(0, weight=1)
-
-
-class SeeClass(Screen):
-    def __init__(self, app):
-        self.app = app
-    
-    def build(self, *args, **kwargs):
-        library_class: pd.Series = args[0]
-
-        title_frame = ctk.CTkFrame(
-            self.app,
-            fg_color="transparent"
-        )
-        title_frame.rowconfigure(0, weight=1)
-        title_frame.rowconfigure(1, weight=1)
-        title_frame.columnconfigure(0, weight=1)
-        title_frame.columnconfigure(1, weight=1)
-
-        title = ctk.CTkLabel(
-            title_frame,
-            text=f"{library_class.nometurma}",
-            font=("Arial", 20, "bold"),
-            text_color=Colors.SLATE.c_900,
-            justify="left"
-        )
-        title.grid(column=0, row=0, sticky="w")
-
-        description = ctk.CTkLabel(
-            title_frame,
-            text=f"Vendo as propriedades da turma",
-            font=("Arial", 15, "bold"),
-            text_color=Colors.SLATE.c_900,
-            justify="left"
-        )
-        description.grid(column=0, row=1, sticky="w")
-
-        go_back_button = ctk.CTkButton(
-            title_frame,
-            command=lambda: RouteManager.go_back(),
-            fg_color="#ffffff",
-            hover_color=Colors.GRAY.c_100,
-            text_color=Colors.GRAY.c_800,
-            border_color=Colors.GRAY.c_300,
-            border_width=1,
-            text="Voltar",
-            font=("Arial", 13, "bold"),
-            width=100,
-            corner_radius=10
-        )
-        go_back_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
@@ -274,6 +228,7 @@ class CreateClass(Screen):
 
         self.nometurma = Input(
             master=wrapper,
+            name="nometurma",
             placeholder_text="Insira o nome da Turma",
             border_width=1,
             width=300,
@@ -288,7 +243,7 @@ class CreateClass(Screen):
             font=("Arial", 14, "bold"),
             fg_color=Colors.INDIGO.c_600,
             hover_color=Colors.INDIGO.c_700,
-            command=lambda: self.send,
+            command=self.send,
             text_color="#fff",
             width=100,
             corner_radius=10

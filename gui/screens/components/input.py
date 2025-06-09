@@ -1,8 +1,9 @@
 import customtkinter as ctk
 
 class Input(ctk.CTkEntry):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, name, **kwargs):
         super().__init__(master, **kwargs)
+        self.name = name
         self._entry.bind("<Shift-Left>", self.select_left)
         self._entry.bind("<Shift-Right>", self.select_right)
         self._entry.bind("<Home>", lambda e: self._entry.icursor(0))
