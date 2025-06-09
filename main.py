@@ -5,9 +5,9 @@ from gui.manager.routemanager import RouteManager
 # Routes
 from gui.screens.alunos import Students, EditStudent, CreateStudent
 from gui.screens.livros import Books, EditBook, CreateBook
-from gui.screens.atendentes import Secretaries
-from gui.screens.categorias import Categories
-from gui.screens.emprestimos import Loans
+from gui.screens.atendentes import Secretaries, EditSecretary, CreateSecretary
+from gui.screens.categorias import Categories, EditCategory, CreateCategory
+from gui.screens.emprestimos import Loans, EditLoan, CreateLoan
 from gui.screens.grupos import Groups
 from gui.screens.reservas import Reserves
 from gui.screens.suspensoes import Suspensions
@@ -33,8 +33,18 @@ if __name__ == "__main__":
         "create_book": CreateBook(app.layout.frame),
 
         "secretaries": Secretaries(app.layout.frame),
+        "edit_atts": EditSecretary(app.layout.frame),
+        "create_att": CreateSecretary(app.layout.frame),
+
+
         "categories": Categories(app.layout.frame),
+        "edit_categories": EditCategory(app.layout.frame),
+        "create_category": CreateCategory(app.layout.frame),
+
         "loans": Loans(app.layout.frame),
+        "edit_loans": EditLoan(app.layout.frame),
+        "create_loan": CreateLoan(app.layout.frame),
+
         "groups": Groups(app.layout.frame),
         "reserves": Reserves(app.layout.frame),
         "suspensions": Suspensions(app.layout.frame),
