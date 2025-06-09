@@ -27,12 +27,11 @@ class Table:
             font=("Arial", 14, "bold")
         )
         column_label.grid(row=0, column=3, sticky='ew')  # Alinhando bonitinho
-        
-        table = table.to_numpy()  # Transformando a tabela em numpy para mexer melhor
 
-        for i, datapoint in enumerate(table):  # Adicionando os valores da tabela
+        for datapoint in table.iterrows():  # Adicionando os valores da tabela
+            i = datapoint[0]
             frame.rowconfigure(i, weight=1)
-            for j, value in enumerate(datapoint):  # Indo em cada coluna
+            for j, value in enumerate(datapoint[1]):  # Indo em cada coluna
                 color = Colors.INDIGO.c_100
                 if i % 2 == 1:
                     color = Colors.GRAY.c_50
@@ -40,8 +39,6 @@ class Table:
                 label = ctk.CTkLabel(
                     frame,
                     text=value,
-                    padx=5,
-                    pady=5,
                     fg_color=color,
                     height=14
                 )
@@ -59,9 +56,12 @@ class Table:
             actions_frame.columnconfigure(1, weight=1)
             actions_frame.rowconfigure(0, weight=1)
 
-            edit_button = EditButton(self.go_on_edit, "meh", "meh meh", actions_frame)
+            edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
             edit_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
-            trash_icon = TrashButton(self.go_on_edit, "meh", "meh meh", actions_frame)
+            trash_icon = TrashButton((
+                "SUBSTITUIR PELA TABELA POSTERIORMENTE",
+                datapoint[1]
+            ), actions_frame)
             trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
 
         frame.grid(row=1, column=0, sticky="ew")

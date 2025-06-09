@@ -2,24 +2,24 @@ import customtkinter as ctk
 from PIL import Image
 import os
 from config.colors import Colors
+from gui.manager.routemanager import RouteManager
+from utils.word import wrap_text
 
 
 class EditButton:
     def __init__(
         self,
         route,
-        root_application,
         route_arguments,
         master
     ):
-        self.root_application = root_application
         self.route = route
         self.master = master
 
         def on_click():
-            self.root_application.go_to(route, route_arguments)
+            RouteManager.go_to(route, route_arguments)
 
-        self._image = ctk.CTkImage(
+        self.image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "edit-icon.png")),
             size=(20, 20)
         )
@@ -27,10 +27,10 @@ class EditButton:
         self.__button = ctk.CTkButton(
             self.master,
             command=on_click,
-            image=self._image,
+            image=self.image,
             text="",
-            width=20,
-            height=20
+            width=25,
+            height=25
         )
     
     def grid(self, **kwargs):
@@ -40,17 +40,10 @@ class EditButton:
 class TrashButton:
     def __init__(
         self,
-        route,
-        root_application,
-        route_arguments,
+        arguments,
         master
     ):
-        self.root_application = root_application
-        self.route = route
         self.master = master
-
-        def on_click():
-            self.root_application.go_to(route, route_arguments)
 
         self._image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "trash-icon.png")),
@@ -59,15 +52,101 @@ class TrashButton:
 
         self.__button = ctk.CTkButton(
             self.master,
-            command=on_click,
             image=self._image,
+            command=lambda: self.delete_entry(arguments[0], arguments[1]),
             text="",
-            width=20,
-            height=20,
+            width=25,
+            height=25,
             fg_color=Colors.ROSE.c_600,
             hover_color=Colors.ROSE.c_700
         )
     
     def grid(self, **kwargs):
         self.__button.grid(**kwargs)
+    
+    def delete_entry(self, table, entry):
+        """_summary_
 
+        Args:
+            arguments (_type_): _description_
+        """
+        # Cria a sobreposição (janela sem bordas)
+        root = RouteManager.app
+        overlay = ctk.CTkFrame(root, fg_color=Colors.VIOLET.c_200)
+
+        overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+        overlay.columnconfigure(0, weight=1)
+        overlay.rowconfigure(0, weight=1)
+
+        box = ctk.CTkFrame(  # Caixa do MODAL
+            overlay,
+            corner_radius=10,
+            fg_color="#ffffff",
+        )
+        box.grid(row=0, column=0)
+
+        box.rowconfigure(0, weight=1)
+        box.rowconfigure(1, weight=1)
+        box.rowconfigure(2, weight=1)
+
+        # Colocando os elementos dentro do box
+        icon = ctk.CTkImage(
+            light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "warning-icon.png")),
+            size=(36, 36)
+        )
+        warning_icon = ctk.CTkLabel(
+            box,
+            image=icon,
+            text="",
+        )
+        warning_icon.grid(row=0, column=0, padx=(10, 5), pady=(10,0), sticky="ewn")
+
+        label_title = ctk.CTkLabel(
+            box,
+            text="Deletando Registro",
+            font=("Arial", 23, "bold"),
+            text_color=Colors.SLATE.c_900
+        )
+        label_title.grid(row=0,column=1, sticky="w", padx=10, pady=(10,0))
+
+        label_description = ctk.CTkLabel(
+            box,
+            text=wrap_text("Tem certeza de que deseja deletar esse registro? Essa ação é irreversível, tenha certeza ABSOLUTA do que está fazendo e das consequências", 55),
+            text_color=Colors.SLATE.c_500,
+            justify="left",
+            font=("Arial", 15)
+        )
+        label_description.grid(row=1,column=1, sticky="nw", padx=10, pady=(0, 10))
+
+        buttons_container = ctk.CTkFrame(
+            box,
+            fg_color="transparent"
+        )
+        buttons_container.grid(column=1, row=2, sticky="w", pady=(0, 15))
+
+        confirm_button = ctk.CTkButton(
+            buttons_container,
+            command=lambda: print("Deletei"),
+            fg_color=Colors.RED.c_500,
+            hover_color=Colors.RED.c_700,
+            text_color="#ffffff",
+            text="Deletar",
+            font=("Arial", 13, "bold"),
+            width=100
+        )
+        confirm_button.grid(column=0, row=0, padx=(10, 5))
+
+        cancel_button = ctk.CTkButton(
+            buttons_container,
+            command=overlay.destroy,
+            fg_color="#ffffff",
+            hover_color=Colors.GRAY.c_100,
+            text_color=Colors.GRAY.c_800,
+            border_color=Colors.GRAY.c_300,
+            border_width=1,
+            text="Cancelar",
+            font=("Arial", 13, "bold"),
+            width=100
+        )
+        cancel_button.grid(column=1, row=0, padx=5)

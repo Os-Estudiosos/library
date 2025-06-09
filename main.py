@@ -4,6 +4,8 @@ from gui.manager.routemanager import RouteManager
 
 # Routes
 from gui.screens.alunos import Students
+from gui.screens.alunos import EditStudents
+
 from gui.screens.livros import Books
 from gui.screens.atendentes import Secretaries
 from gui.screens.categorias import Categories
@@ -24,6 +26,8 @@ if __name__ == "__main__":
 
     RouteManager.routes = {  # Definindo minhas telas
         "students": Students(app.layout.frame),
+        "edit_students": EditStudents(app.layout.frame),
+
         "books": Books(app.layout.frame),
         "secretaries": Secretaries(app.layout.frame),
         "categories": Categories(app.layout.frame),
