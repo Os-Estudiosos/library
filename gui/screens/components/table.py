@@ -105,4 +105,4 @@ class Table:
             trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
 
         frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-        upper_frame.grid(row=1, column=0, sticky="ew")
+        upper_frame.grid(row=1, column=0, sticky="ew", padx=20)
