@@ -10,43 +10,83 @@ class Table:
         self.go_on_edit = go_on_edit
     
     def build(self, table: pd.DataFrame):
-        frame = ctk.CTkFrame(self.app, fg_color=Colors.GRAY.c_50)  # Criando o frame da tabela inteira
+        upper_frame = ctk.CTkFrame(self.app, fg_color=Colors.GRAY.c_50)  # Criando o frame da tabela inteira
+        upper_frame.rowconfigure(0, weight=1)
+        upper_frame.columnconfigure(0, weight=1)
+
+        frame = ctk.CTkFrame(upper_frame, fg_color=Colors.GRAY.c_50)  # Criando o frame interno
 
         for j, column in enumerate(table.columns): # Adicionando o Cabeçalho
             frame.columnconfigure(j, weight=1)  # Configurando para que a coluna expanda
-            column_label = ctk.CTkLabel(  # Adicionando o texto;
+            column_cell = ctk.CTkFrame(
                 frame,
-                text=column,
-                font=("Arial", 14, "bold")
+                fg_color=Colors.GRAY.c_50,
+                corner_radius=0
             )
-            column_label.grid(row=0, column=j, sticky='ew')  # Expandindo para ficar bonito
+            column_cell.grid(row=0, column=j, sticky='ew')  # Expandindo para ficar bonito
+            
+            column_label = ctk.CTkLabel(  # Adicionando o texto;
+                column_cell,
+                text=column,
+                font=("Arial", 14, "bold"),
+                text_color=Colors.SLATE.c_800,
+            )
+            column_label.grid(row=0, column=0, sticky='w', padx=(10, 0), pady=(0, 5))  # Expandindo para ficar bonito
+
         frame.columnconfigure(j+1, weight=1)  # Coluna extra padrão
-        column_label = ctk.CTkLabel(  # Texto
+
+        column_cell = ctk.CTkFrame(
             frame,
-            text="Opções",
-            font=("Arial", 14, "bold")
+            fg_color="#F9FAFB",
+            corner_radius=0
         )
-        column_label.grid(row=0, column=3, sticky='ew')  # Alinhando bonitinho
+        column_cell.grid(row=0, column=j+1, sticky='ew')  # Expandindo para ficar bonito
+        column_cell.rowconfigure(0, weight=1)  # Coluna extra padrão
+        column_cell.columnconfigure(0, weight=1)  # Coluna extra padrão
+
+        column_label = ctk.CTkLabel(  # Texto
+            column_cell,
+            text="Opções",
+            font=("Arial", 14, "bold"),
+            justify="center",
+            text_color=Colors.SLATE.c_800,
+        )
+        column_label.grid(row=0, column=0, sticky='ew', padx=(10, 0), pady=(0, 5))  # Alinhando bonitinho
+
+
+        # Linha de divisão entre cabeçalho e linhas
+        line = ctk.CTkFrame(
+            frame,
+            fg_color=Colors.GRAY.c_600,
+            height=2
+        )
+        line.grid(row=1, column=0, columnspan=j+2, sticky="ew")
+
 
         for datapoint in table.iterrows():  # Adicionando os valores da tabela
-            i = datapoint[0]
+            i = datapoint[0]+1
             frame.rowconfigure(i, weight=1)
             for j, value in enumerate(datapoint[1]):  # Indo em cada coluna
-                color = Colors.INDIGO.c_100
-                if i % 2 == 1:
-                    color = Colors.GRAY.c_50
+                cell = ctk.CTkFrame(
+                    frame,
+                    fg_color=Colors.GRAY.c_50 if i%2==0 else Colors.GRAY.c_100,
+                    corner_radius=0
+                )
+                cell.grid(row=i+1, column=j, sticky='nsew')
+                cell.rowconfigure(0, weight=1)
+                cell.columnconfigure(0, weight=1)
 
                 label = ctk.CTkLabel(
-                    frame,
+                    cell,
                     text=value,
-                    fg_color=color,
-                    height=14
+                    height=14,
+                    text_color=Colors.SLATE.c_500
                 )
-                label.grid(row=i+1, column=j, sticky='nsew')
+                label.grid(row=0, column=0, sticky='nsw', padx=(10, 0))
             
             actions_frame = ctk.CTkFrame(  # Adicionando o frame dos botões
                 frame,
-                fg_color=color,
+                fg_color=Colors.GRAY.c_50 if i%2==0 else Colors.GRAY.c_100,
                 corner_radius=0,
                 height=14
             )
@@ -64,4 +104,5 @@ class Table:
             ), actions_frame)
             trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
 
-        frame.grid(row=1, column=0, sticky="ew")
+        frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        upper_frame.grid(row=1, column=0, sticky="ew")
