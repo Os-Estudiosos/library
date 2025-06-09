@@ -1,5 +1,11 @@
+# UI
 from gui import Application
-import customtkinter as ctk
+
+# Configurations
+from config.database import *
+
+# Tables and Connections
+from database import Connection
 
 if __name__ == "__main__":
     app = Application(fg_color="#ffffff")

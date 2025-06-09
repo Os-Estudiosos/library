@@ -98,7 +98,7 @@ class Layout(Screen):
                 hover_color=Colors.PURPLE.c_200,
                 text_color=text_color,
                 command=option["callback"],
-                font=("Arial", 14, "bold"),
+                font=("Arial", 15, "bold"),
             )
             btn.grid(row=i+1, column=0, padx=10, pady=5, ipadx=5, ipady=5)
     
