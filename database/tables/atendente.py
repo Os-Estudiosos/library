@@ -54,15 +54,15 @@ class AtendenteTable:
             total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
             offset = (pagina - 1) * registros_por_pagina
             sql = f"""
-                SELECT CPFAtt,
-                       CONCAT(PrimeiroNomeAtt, ' ', UltimoNomeAtt) AS NomeCompleto
+                SELECT Atendente.CPFAtt,
+                       CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompleto
                 {base_sql}
             """
             params = []
             if filter:
                 sql += f" WHERE {where_clause}"
                 params.extend(filter.values())
-            sql += " ORDER BY CPFAtt LIMIT %s OFFSET %s"
+            sql += " ORDER BY Atendente.CPFAtt LIMIT %s OFFSET %s"
             params.extend([registros_por_pagina, offset])
             cursor.execute(sql, tuple(params))
             registros = cursor.fetchall()

@@ -16,7 +16,7 @@ class Connection:
                 user=self.user,
                 password=self.password,  
                 host=self.host,
-                port="5432"
+                port="3389"
             )
             self.conn.cursor().execute(f"SET search_path TO {self.path};")
             self.conn.commit() 
