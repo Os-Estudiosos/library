@@ -2,11 +2,14 @@ from gui.screens import Screen
 import customtkinter as ctk
 from config.colors import Colors
 import pandas as pd
+import numpy as np
 
 from gui.manager.routemanager import RouteManager
 
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+
+from gui.manager.tablesmanager import TablesManager
 
 import tkinter as tk
 
@@ -14,6 +17,7 @@ import tkinter as tk
 class Books(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -83,30 +87,27 @@ class Books(Screen):
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
 
-        students = pd.read_csv("gui/screens/csv/books.csv")
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_books")
+        pagination = TablesManager.livroTable.read(qtd=self.items_per_page, pagina=page)
 
-        pagination = {
-            "registros": students.head(10),
-            "total_registros": 30,
-            "registros_por_pagina": 10,
-            "total_paginas": 3,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
         table.build(pagination)
 
 
 class EditBook(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_isbnliv = None
     
     def build(self, *args, **kwargs):
-        book = args[0]
+        self.current_isbnliv = args[0]["isbnliv"]
+        book = TablesManager.livroTable.read_one(
+            isbnliv=self.current_isbnliv,
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -186,7 +187,7 @@ class EditBook(Screen):
                 "idgru": {
                     "label": "Grupo:",
                     "intype": "search",
-                    "table": "groups",
+                    "table": TablesManager.grupoTable,
                     "exihibition_column": "nomegru",
                     "value_column": "idgru"
                 }
@@ -206,6 +207,17 @@ class EditBook(Screen):
             ]
         )
         self.forms.build(self.send, book)
+    
+    def send(self):
+        values = self.forms.get_values()
+        for k, v in values.items():
+            if isinstance(v, np.int64):
+                values[k] = int(v)
+        del values["isbnliv"]
+        TablesManager.livroTable.update({
+            "isbnliv": self.current_isbnliv,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateBook(Screen):
@@ -294,7 +306,7 @@ class CreateBook(Screen):
                 "idgru": {
                     "label": "Grupo:",
                     "intype": "search",
-                    "table": "groups",
+                    "table": TablesManager.grupoTable,
                     "exihibition_column": "nomegru",
                     "value_column": "idgru"
                 }
@@ -314,3 +326,15 @@ class CreateBook(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        for k, v in values.items():
+            if isinstance(v, np.int64):
+                values[k] = int(v)
+        isbn = values["isbnliv"]
+        del values["isbnliv"]
+        TablesManager.livroTable.create({
+            "isbnliv": isbn,
+        },values)
+        RouteManager.go_back()

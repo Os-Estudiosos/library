@@ -89,7 +89,7 @@ class LivroTable:
         cursor = None
         try:
             cursor = self.conn.cursor()
-            cursor.execute(f"SELECT * FROM {self.name} WHERE isbnliv='%s';", (isbnliv,))
+            cursor.execute(f"SELECT * FROM {self.name} WHERE isbnliv=%s;", (isbnliv,))
 
             registro = cursor.fetchall()
             cursor.close()
