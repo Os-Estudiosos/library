@@ -20,6 +20,8 @@ class Connection:
             )
             self.conn.cursor().execute(f"SET search_path TO {self.path};")
             self.conn.commit() 
+            return self.conn
+        
         except Exception as e:
             print("Erro ao conectar ao banco de dados:", e)
             self.conn = None
