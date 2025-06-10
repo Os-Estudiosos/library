@@ -8,10 +8,13 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Groups(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -80,30 +83,27 @@ class Groups(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        groups = pd.read_csv("gui/screens/csv/groups.csv")
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_groups", "see_group")
+        pagination = TablesManager.grupoTable.read(qtd=self.items_per_page, pagina=page)
 
-        pagination = {
-            "registros": groups,
-            "total_registros": 10,
-            "registros_por_pagina": 10,
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_groups", TablesManager.grupoTable, "idgru", "see_group")
         table.build(pagination)
 
 
 class EditGroup(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_idgru = None
     
     def build(self, *args, **kwargs):
-        group = args[0]
+        self.current_idgru = args[0]["idgru"]
+        group = TablesManager.grupoTable.read_one(
+            idgru=self.current_idgru,
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -169,6 +169,13 @@ class EditGroup(Screen):
             ]
         )
         self.forms.build(self.send, group)
+    
+    def send(self):
+        values = self.forms.get_values()
+        TablesManager.grupoTable.update({
+            "idgru": self.current_idgru,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateGroup(Screen):
@@ -243,6 +250,14 @@ class CreateGroup(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        current_idres = TablesManager.grupoTable.read()["total_registros"]
+        TablesManager.grupoTable.create({
+            "idgru": current_idres+1,
+        },values)
+        RouteManager.go_back()
 
 
 class SeeGroup(Screen):
