@@ -1,88 +1,118 @@
 import unittest
 from database import Connection
 from database.tables.turma import TurmaTable
+import pandas as pd
 
 class TestTurmaTable(unittest.TestCase):
     @classmethod
-    def setUpClass(cls): 
+    def setUpClass(cls):
+        # Inicializa a conexão com o banco de dados
         cls.connection = Connection("livraria", "livraria", "thalis", "10.61.49.160", "thalis").initialize()
+        if cls.connection is None:
+            raise RuntimeError("Falha ao inicializar a conexão com o banco de dados. Verifique as credenciais, host ou esquema.")
+        if cls.connection.closed:
+            raise RuntimeError("Conexão com o banco de dados está fechada.")
         cls.turma_table = TurmaTable(cls.connection)
 
-    def get_next_id(self):
-        self.turma_table.cursor.execute("SELECT MAX(IdTurma) FROM Turma;")
-        max_id = self.turma_table.cursor.fetchone()[0]
-        return (max_id or 0) + 1
-
     def test_create_turma(self):
-        next_id = self.get_next_id()
-        self.turma_table.create(next_id, "Turma Teste")
-        self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (next_id,))
-        result = self.turma_table.cursor.fetchone()
+        # Testa a inserção de uma nova turma
+        primary_key = {"IdTurma": 4}
+        colums = {"NomeTurma": "Turma Teste"}
+        self.turma_table.create(primary_key, colums)
+        cursor = self.turma_table.conn.cursor()
+        cursor.execute("SELECT IdTurma, NomeTurma FROM Turma WHERE IdTurma = %s;", (4,))
+        result = cursor.fetchone()
+        cursor.close()
         self.assertIsNotNone(result)
-        self.assertEqual(result[0], "Turma Teste")
-        self.turma_table.delete(next_id)
+        self.assertEqual(result[0], 4)
+        self.assertEqual(result[1], "Turma Teste")
+        # Limpar o registro inserido
+        self.turma_table.delete(primary_key)
 
     def test_create_turma_conflict(self):
-        next_id = self.get_next_id()
-        self.turma_table.create(next_id, "Turma Teste A")
-        self.turma_table.create(next_id, "Turma Teste B")  # Deve atualizar devido ao ON CONFLICT
-        self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (next_id,))
-        result = self.turma_table.cursor.fetchone()
-        self.assertEqual(result[0], "Turma Teste B")
-        # Limpar
-        self.turma_table.delete(next_id)
+        # Testa a inserção de uma turma existente (atualização via ON CONFLICT)
+        primary_key = {"IdTurma": 1}
+        colums = {"NomeTurma": "Turma Atualizada"}
+        self.turma_table.create(primary_key, colums)
+        cursor = self.turma_table.conn.cursor()
+        cursor.execute("SELECT IdTurma, NomeTurma FROM Turma WHERE IdTurma = %s;", (1,))
+        result = cursor.fetchone()
+        cursor.close()
+        self.assertIsNotNone(result)
+        self.assertEqual(result[1], "Turma Atualizada")
+        # Restaurar o registro original
+        original_colums = {"NomeTurma": "Turma A"}
+        self.turma_table.create(primary_key, original_colums)
 
-    def test_read_turmas(self):
-        ids = []
-        for i in range(3):
-            next_id = self.get_next_id()
-            self.turma_table.create(next_id, f"Turma Teste {i}")
-            ids.append(next_id)
+    def test_read_turma(self):
+        # Testa a leitura com paginação (ex.: 2 registros)
         result = self.turma_table.read(qtd=2)
-        self.assertEqual(len(result["registros"]), 2)
-        # Limpar
-        for id in ids:
-            self.turma_table.delete(id)
+        self.assertIsInstance(result["registros"], pd.DataFrame)
+        self.assertEqual(len(result["registros"]), min(2, result["total_registros"]))
+        self.assertTrue("total_registros" in result)
+        self.assertEqual(result["total_registros"], 3)  # Verifica o total de linhas
+        self.assertTrue("total_paginas" in result)
+        self.assertTrue("pagina_atual" in result)
+        self.assertEqual(list(result["registros"].columns), ["ID Turma", "Nome Turma"])
 
-    def test_read_turmas_with_filter(self):
-        next_id = self.get_next_id()
-        self.turma_table.create(next_id, "Turma Filtro")
-        result = self.turma_table.read(filter={"IdTurma": next_id})
+    def test_read_turma_with_filter(self):
+        # Testa a leitura com filtro por IdTurma
+        filter_dict = {"IdTurma": 1}
+        result = self.turma_table.read(filter=filter_dict)
+        self.assertIsInstance(result["registros"], pd.DataFrame)
         self.assertEqual(len(result["registros"]), 1)
-        self.assertEqual(result["registros"][0][0], next_id)
-        self.turma_table.delete(next_id)
+        self.assertEqual(result["registros"].iloc[0]["ID Turma"], 1)
+        self.assertEqual(result["registros"].iloc[0]["Nome Turma"], "Turma A")
 
     def test_update_turma(self):
-        next_id = self.get_next_id()
-        self.turma_table.create(next_id, "Turma Original")
-        self.turma_table.update(next_id, "Turma Atualizada")
-        self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (next_id,))
-        result = self.turma_table.cursor.fetchone()
-        self.assertEqual(result[0], "Turma Atualizada")
-        self.turma_table.delete(next_id)
+        # Testa a atualização de uma turma existente
+        primary_key = {"IdTurma": 4}
+        colums_create = {"NomeTurma": "Turma Teste"}
+        self.turma_table.create(primary_key, colums_create)
+        colums_update = {"NomeTurma": "Turma Nova"}
+        self.turma_table.update(primary_key, colums_update)
+        cursor = self.turma_table.conn.cursor()
+        cursor.execute("SELECT IdTurma, NomeTurma FROM Turma WHERE IdTurma = %s;", (4,))
+        result = cursor.fetchone()
+        cursor.close()
+        self.assertIsNotNone(result)
+        self.assertEqual(result[1], "Turma Nova")
+        # Limpar o registro inserido
+        self.turma_table.delete(primary_key)
 
     def test_update_turma_inexistente(self):
-        non_existent_id = self.get_next_id() + 1000
-        self.turma_table.update(non_existent_id, "Turma Inexistente")
-        self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (non_existent_id,))
-        result = self.turma_table.cursor.fetchone()
+        # Testa a atualização de uma turma inexistente
+        primary_key = {"IdTurma": 999}
+        colums = {"NomeTurma": "Turma Inexistente"}
+        self.turma_table.update(primary_key, colums)
+        cursor = self.turma_table.conn.cursor()
+        cursor.execute("SELECT IdTurma FROM Turma WHERE IdTurma = %s;", (999,))
+        result = cursor.fetchone()
+        cursor.close()
         self.assertIsNone(result)
 
     def test_delete_turma(self):
-        next_id = self.get_next_id()
-        self.turma_table.create(next_id, "Turma a Deletar")
-        self.turma_table.delete(next_id)
-        self.turma_table.cursor.execute("SELECT NomeTurma FROM Turma WHERE IdTurma = %s;", (next_id,))
-        result = self.turma_table.cursor.fetchone()
+        # Testa a exclusão de uma turma existente
+        primary_key = {"IdTurma": 4}
+        colums = {"NomeTurma": "Turma Teste"}
+        self.turma_table.create(primary_key, colums)
+        self.turma_table.delete(primary_key)
+        cursor = self.turma_table.conn.cursor()
+        cursor.execute("SELECT IdTurma FROM Turma WHERE IdTurma = %s;", (4,))
+        result = cursor.fetchone()
+        cursor.close()
         self.assertIsNone(result)
 
     def test_delete_turma_inexistente(self):
-        non_existent_id = self.get_next_id() + 1000
-        self.turma_table.delete(non_existent_id)
+        # Testa a exclusão de uma turma inexistente
+        primary_key = {"IdTurma": 999}
+        self.turma_table.delete(primary_key)
+        # Não há necessidade de verificar, pois o método já trata o caso
 
     @classmethod
     def tearDownClass(cls):
-        if not cls.connection.closed:
+        # Fecha a conexão com o banco de dados
+        if cls.connection and not cls.connection.closed:
             cls.turma_table.close()
 
 if __name__ == "__main__":
