@@ -55,9 +55,13 @@ class AlunoTable:
             offset = (pagina - 1) * registros_por_pagina
             sql = f"""
                 SELECT Aluno.MatriculaAl,
-                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
-                    Aluno.DataNascimentoAl,
-                    Turma.NomeTurma
+                SELECT Aluno.PrimeiroNomeAl,
+                SELECT Aluno.UltimoNomeAl,
+                Aluno.DataNascimentoAl,
+                Aluno.SenhaAl,
+                Aluno.IdTurma,
+                CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
+                Turma.NomeTurma
                 {base_sql}
             """
             params = []
@@ -74,13 +78,31 @@ class AlunoTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "Matrícula", "Nome completo", "Data nascimento", "Turma"
-                ])
+                    "Matrícula", "primnome", "ultnome", "datanasc", "senha", "idturma", "Nome completo", "Turma"
+                ]).drop(columns=["primnome", "ultnome", "datanasc", "senha", "idturma"]), 
+                "bruto": pd.DataFrame(registros, columns=[
+                    "matriculaal", "primeironomeal", "ultimonomeal", "datanascimentoal", "senhaal", "idturma", "Nome completo", "Turma"
+                ]).drop(columns=["Nome completo", "Turma"])
             })
             return resultado
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
+        
+    def read_one(self, matriculaal: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE matriculaal='%s';", (matriculaal,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["matriculaal","primeironomeal", "ultimonomeal", "datanascimentoal", "senhaal", "idturma"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

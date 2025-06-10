@@ -74,7 +74,8 @@ class AtendenteTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "CPF", "Nome completo"
-                ])
+                ]), 
+                "bruto": pd.DataFrame(registros, columns=["cpfatt", "nomeatt"])
             })
             return resultado
         except Exception as e:
@@ -82,6 +83,21 @@ class AtendenteTable:
             if cursor:
                 cursor.close()
             return {}
+        
+    def read_one(self, cpfatt: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE cpfatt='%s';", (cpfatt,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["cpfatt","nometurma"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

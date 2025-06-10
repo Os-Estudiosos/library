@@ -61,6 +61,9 @@ class EmprestimoTable:
                     Emprestimo.DataInicioEmp,
                     Emprestimo.DataFimEmp,
                     Emprestimo.BaixaEmp,
+                    Emprestimo.MatriculaAl,
+                    Emprestimo.ISBNLiv,
+                    Emprestimo.CPFAtt,
                     CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
                     CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompletoAtt,
                     Livro.NomeLiv
@@ -80,18 +83,38 @@ class EmprestimoTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "ID Emprestimo", "Data início", "Data fim", "Baixa",
-                    "Nome Aluno", "Nome Atendente", "Nome Livro"
-                ]),
+                    "ID Emprestimo", "Data início", "Data fim", "Baixa", "Matricula Aluno",
+                    "ISBN Livro", "CPF Att", "Nome Aluno", "Nome Atendente", "Nome Livro"
+                ]).drop(columns=["Matricula Aluno", "ISBN Livro", "CPF Att"]),
                 "bruto": pd.DataFrame(
                     registros,
-                    columns=["idemp", "datainicioemp", "datafimemp", "baixaemp", "isbnliv"],
-                )
+                    columns=["idemp", "datainicioemp", "datafimemp", "baixaemp", "matriculaal", 
+                             "isbnliv", "cpfatt", "nomeal", "nomeatt", "nomeliv"]).drop(columns=["nomeal", "nomeatt", "nomeliv"])
             })
             return resultado
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
+        
+    def read_one(self, idemp: int, matriculaal: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"SELECT * FROM {self.name} WHERE idemp = %s AND matriculaal = %s;",
+                (idemp, matriculaal)
+            )
+            registro = cursor.fetchone()
+            if registro is None:
+                print("Nenhum registro encontrado.")
+                return None
+            cursor.close()
+            return pd.Series(registro, index=["idemp", "datainicioemp", "datafimemp", "baixaemp", "matriculaal", "isbnliv", "cpfatt"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

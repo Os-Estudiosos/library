@@ -60,6 +60,7 @@ class LivroTable:
                     Livro.EditoraLiv,
                     Livro.EdicaoLiv,
                     Livro.AnoLancamentoLiv,
+                    Livro.IdGru,
                     Grupo.NomeGru
                 {base_sql}
             """
@@ -78,8 +79,8 @@ class LivroTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "ISBN Livro", "Nome Livro", "Editora Livro", "Edição Livro",
-                    "Ano Lançamento", "Grupo"
-                ]),
+                    "Ano Lançamento", "Id Grupo", "Grupo"
+                ]).drop(columns=["Id Grupo"]),
                 "bruto": pd.DataFrame(
                     registros,
                     columns=["isbnliv", "nomeliv", "editoraliv", "edicaoliv", "anolancamentoliv", "idgru"],
@@ -89,6 +90,21 @@ class LivroTable:
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
+        
+    def read_one(self, isbnliv: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE isbnliv='%s';", (isbnliv,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["isbnliv","nomeliv", "editoraliv", "edicaoliv", "anolancamentoliv", "idgru"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

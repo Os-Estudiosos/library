@@ -86,6 +86,21 @@ class GrupoTable:
             if cursor:
                 cursor.close()
             return {}
+        
+    def read_one(self, idgru: int):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE idgru='%s';", (idgru,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["idgru","nomegru"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

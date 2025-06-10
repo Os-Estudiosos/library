@@ -9,6 +9,9 @@ class Table(ABC):
     def read(self, qtd=15, filter=None): ...
 
     @abstractmethod
+    def read_one(self, id): ...
+
+    @abstractmethod
     def update(self, *values): ...
 
     @abstractmethod

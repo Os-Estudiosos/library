@@ -58,7 +58,8 @@ class SuspensaoTable:
                 SELECT Suspensao.IdSusp,
                     Suspensao.DataInicioSusp,
                     Suspensao.DataFimSusp,
-                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto
+                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
+                    Suspensao.MatriculaAl
                 {base_sql}
             """
             params = []
@@ -76,8 +77,8 @@ class SuspensaoTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "Id Suspensão", "Data Início", "Data Fim", "Nome Aluno"
-                ]),
+                    "Id Suspensão", "Data Início", "Data Fim", "Nome Aluno", "Matricula"
+                ]).drop(columns=["Matricula"]),
                 "bruto": pd.DataFrame(
                     registros,
                     columns=["idsusp", "datainiciosusp", "datafimsusp", "matriculaal"],
@@ -89,6 +90,26 @@ class SuspensaoTable:
             if cursor:
                 cursor.close()
             return {}
+        
+    def read_one(self, idsusp: int, matriculaal: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"SELECT * FROM {self.name} WHERE idsusp = %s AND matriculaal = %s;",
+                (idsusp, matriculaal)
+            )
+            registro = cursor.fetchone()
+            if registro is None:
+                print("Nenhum registro encontrado.")
+                return None
+            cursor.close()
+            return pd.Series(registro, index=["idsusp", "datainiciosusp", "datafimsusp", "matriculaal"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

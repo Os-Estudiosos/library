@@ -58,6 +58,8 @@ class ReservaTable:
             sql = f"""
                 SELECT Reserva.IdRes,
                     Reserva.DataRes,
+                    Reserva.MatriculaAl,
+                    Reserva.ISBNLiv,
                     CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeAluno,
                     Livro.NomeLiv
                 {base_sql}
@@ -76,8 +78,8 @@ class ReservaTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "Id Reserva", "Data Reserva", "Nome Aluno", "Nome Livro"
-                ]),
+                    "Id Reserva", "Data Reserva", "Matricula Aluno", "ISBN Livro", "Nome Aluno", "Nome Livro"
+                ]).drop(columns=["Matricula ALuno", "ISBN Livro"]),
                 "bruto": pd.DataFrame(
                     registros,
                     columns=["idres", "datares", "matriculaal", "isbnliv"],
@@ -87,6 +89,26 @@ class ReservaTable:
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
+        
+    def read_one(self, idres: int, matriculaal: str):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"SELECT * FROM {self.name} WHERE idres = %s AND matriculaal = %s;",
+                (idres, matriculaal)
+            )
+            registro = cursor.fetchone()
+            if registro is None:
+                print("Nenhum registro encontrado.")
+                return None
+            cursor.close()
+            return pd.Series(registro, index=["idres", "datares", "matriculaal", "matriculaal"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

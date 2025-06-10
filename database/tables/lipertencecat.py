@@ -73,7 +73,10 @@ class LiPertenceCatTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "ID Categoria", "ISBN Livro"
+                    "ISBN Livro", "Id Categoria"
+                ]),
+                "bruto": pd.DataFrame(registros, columns=[
+                    "isbnliv", "idcat"
                 ])
             })
             return resultado
@@ -82,6 +85,26 @@ class LiPertenceCatTable:
             if cursor:
                 cursor.close()
             return {}
+        
+    def read_one(self, isbnliv: str, idcat: int):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"SELECT * FROM {self.name} WHERE isbnliv = %s AND idcat = %s;",
+                (isbnliv, idcat)
+            )
+            registro = cursor.fetchone()
+            if registro is None:
+                print("Nenhum registro encontrado.")
+                return None
+            cursor.close()
+            return pd.Series(registro, index=["isbnliv", "idcat"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

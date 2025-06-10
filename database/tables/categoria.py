@@ -74,7 +74,8 @@ class CategoriaTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "ID Categoria", "Nome Categoria"
-                ])
+                ]),
+                "bruto": pd.DataFrame(registros, columns=["idcat", "nomecat"])
             })
             return resultado
         except Exception as e:
@@ -82,6 +83,21 @@ class CategoriaTable:
             if cursor:
                 cursor.close()
             return {}
+        
+    def read_one(self, idcat: int):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE idcat='%s';", (idcat,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["idcat","nometurma"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:
