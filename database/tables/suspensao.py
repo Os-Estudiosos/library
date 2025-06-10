@@ -41,7 +41,7 @@ class SuspensaoTable:
                 INNER JOIN Aluno ON Suspensao.MatriculaAl = Aluno.MatriculaAl
             """
             if filter:
-                where_clause = " AND ".join([f"{k} = %s" for k in filter.keys()])
+                where_clause = " AND ".join([f"Suspensao.{k} = %s" for k in filter.keys()])
                 count_sql = f"SELECT COUNT(*) {base_sql} WHERE {where_clause};"
                 cursor.execute(count_sql, list(filter.values()))
             else:
