@@ -19,9 +19,9 @@ class Students(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args):
-        if args[0] is not None:
-            page = args[0]
+    def build(self, **kwargs):
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
         
@@ -106,8 +106,8 @@ class EditStudent(Screen):
         self.app = app
         self.current_matriculaal = None
     
-    def build(self, *args, **kwargs):
-        self.current_matriculaal = args[0]["matriculaal"]
+    def build(self, **kwargs):
+        self.current_matriculaal = kwargs["entry"]["matriculaal"]
         student = TablesManager.alunoTable.read_one(
             matriculaal=self.current_matriculaal,
         )

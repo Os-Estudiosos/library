@@ -16,7 +16,7 @@ class Groups(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,8 +83,8 @@ class Groups(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -99,8 +99,8 @@ class EditGroup(Screen):
         self.app = app
         self.current_idgru = None
     
-    def build(self, *args, **kwargs):
-        self.current_idgru = args[0]["idgru"]
+    def build(self, **kwargs):
+        self.current_idgru = kwargs["entry"]["idgru"]
         group = TablesManager.grupoTable.read_one(
             idgru=self.current_idgru,
         )
@@ -266,7 +266,7 @@ class SeeGroup(Screen):
         self.items_per_page = 10
 
     def build(self, *args, **kwargs):
-        group = args[0]
+        group = kwargs["entry"]
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -315,8 +315,8 @@ class SeeGroup(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        if len(args) >= 2 and args[1] is not None:
-            page = args[1]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -324,5 +324,5 @@ class SeeGroup(Screen):
             "idgru": int(group.idgru)
         }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_book", TablesManager.livroTable, "isbnliv")
+        table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
         table.build(pagination)

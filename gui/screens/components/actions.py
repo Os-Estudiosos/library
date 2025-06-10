@@ -17,7 +17,7 @@ class SeeButton:
         self.master = master
 
         def on_click():
-            RouteManager.go_to(route, route_arguments)
+            RouteManager.go_to(route, **route_arguments)
 
         self.image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "eye-icon.png")),
@@ -42,14 +42,14 @@ class EditButton:
     def __init__(
         self,
         route,
+        master,
         route_arguments,
-        master
     ):
         self.route = route
         self.master = master
 
         def on_click():
-            RouteManager.go_to(route, route_arguments)
+            RouteManager.go_to(route, **route_arguments)
 
         self.image = ctk.CTkImage(
             light_image=Image.open(os.path.join(os.getcwd(), "gui", "images", "edit-icon.png")),

@@ -105,9 +105,13 @@ class Table:
                     actions_frame.columnconfigure(2, weight=1)
                     actions_frame.rowconfigure(0, weight=1)
 
-                    see_button = SeeButton(self.go_on_see, datapoint[1], actions_frame)
+                    see_button = SeeButton(self.go_on_see, {
+                        "entry": datapoint[1]
+                    }, actions_frame)
                     see_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
-                    edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
+                    edit_button = EditButton(self.go_on_edit, actions_frame, {
+                        "entry": datapoint[1]
+                    })
                     edit_button.grid(row=0, column=1, pady=5, padx=5, sticky="ew")
                     trash_icon = TrashButton((
                         self.table,
@@ -119,7 +123,9 @@ class Table:
                     actions_frame.columnconfigure(0, weight=1)
                     actions_frame.columnconfigure(1, weight=1)
 
-                    edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
+                    edit_button = EditButton(self.go_on_edit, actions_frame, {
+                        "entry": datapoint[1]
+                    })
                     edit_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
                     if isinstance(self.primary_key, tuple):
                         entry = [datapoint[1][p_key] for p_key in self.primary_key]

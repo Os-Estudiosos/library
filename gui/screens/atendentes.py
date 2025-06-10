@@ -16,7 +16,7 @@ class Secretaries(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,8 +83,8 @@ class Secretaries(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -99,8 +99,8 @@ class EditSecretary(Screen):
         self.app = app
         self.current_cpfatt = None
     
-    def build(self, *args, **kwargs):
-        self.current_cpfatt = args[0]["cpfatt"]
+    def build(self, **kwargs):
+        self.current_cpfatt = kwargs["entry"]["cpfatt"]
         att = TablesManager.atendenteTable.read_one(
             cpfatt=self.current_cpfatt,
         )

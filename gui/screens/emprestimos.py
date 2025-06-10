@@ -16,7 +16,7 @@ class Loans(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,8 +83,8 @@ class Loans(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -100,9 +100,9 @@ class EditLoan(Screen):
         self.current_idemp = None
         self.current_matriculaal = None
     
-    def build(self, *args, **kwargs):
-        self.current_idemp = args[0]["idemp"]
-        self.current_matriculaal = args[0]["matriculaal"]
+    def build(self, **kwargs):
+        self.current_idemp = kwargs["entry"]["idemp"]
+        self.current_matriculaal = kwargs["entry"]["matriculaal"]
         loan = TablesManager.emprestimoTable.read_one(
             idemp=self.current_idemp,
             matriculaal=self.current_matriculaal

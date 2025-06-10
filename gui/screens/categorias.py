@@ -16,7 +16,7 @@ class Categories(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,8 +83,8 @@ class Categories(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -100,8 +100,8 @@ class EditCategory(Screen):
         self.items_per_page = 10
         self.current_idcat = None
     
-    def build(self, *args, **kwargs):
-        self.current_idcat = args[0]["idcat"]
+    def build(self, **kwargs):
+        self.current_idcat = kwargs["entry"]["idcat"]
         category = TablesManager.categoriaTable.read_one(
             idcat=self.current_idcat,
         )
