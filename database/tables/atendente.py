@@ -5,8 +5,8 @@ import pandas as pd
 class AtendenteTable:
 
     def __init__(self, connection: Connection):
-            self.conn = connection
-            self.name = "Atendente"
+        self.conn = connection
+        self.name = "Atendente"
 
     def create(self, primary_key: dict, colums: dict):
         try:
@@ -40,7 +40,7 @@ class AtendenteTable:
                 FROM {self.name}
             """
             if filter:
-                where_clause = " AND ".join([f"Atendente.{k} = %s" for k in filter.keys()])
+                where_clause = " AND ".join([f"{k} = %s" for k in filter.keys()])
                 count_sql = f"SELECT COUNT(*) {base_sql} WHERE {where_clause};"
                 cursor.execute(count_sql, list(filter.values()))
             else:
@@ -54,19 +54,19 @@ class AtendenteTable:
             total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
             offset = (pagina - 1) * registros_por_pagina
             sql = f"""
-                SELECT Atendente.CPFAtt,
-                    CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompleto,
-                    Atendente.DataNascimentoAtt
+                SELECT CPFAtt,
+                       CONCAT(PrimeiroNomeAtt, ' ', UltimoNomeAtt) AS NomeCompleto
                 {base_sql}
             """
             params = []
             if filter:
                 sql += f" WHERE {where_clause}"
                 params.extend(filter.values())
-            sql += " ORDER BY Atendente.CPFAtt LIMIT %s OFFSET %s"
+            sql += " ORDER BY CPFAtt LIMIT %s OFFSET %s"
             params.extend([registros_por_pagina, offset])
             cursor.execute(sql, tuple(params))
             registros = cursor.fetchall()
+            cursor.close()
             resultado.update({
                 "total_registros": total_registros,
                 "registros_por_pagina": registros_por_pagina,
@@ -79,6 +79,8 @@ class AtendenteTable:
             return resultado
         except Exception as e:
             print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
             return {}
 
     def update(self, primary_key: dict, colums: dict):
