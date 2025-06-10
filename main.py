@@ -6,19 +6,15 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.alunos import Students, EditStudent, CreateStudent
 from gui.screens.livros import Books, EditBook, CreateBook
 from gui.screens.atendentes import Secretaries, EditSecretary, CreateSecretary
-from gui.screens.categorias import Categories, EditCategory, CreateCategory
+from gui.screens.categorias import Categories, EditCategory, CreateCategory, SeeCategory
 from gui.screens.emprestimos import Loans, EditLoan, CreateLoan
-from gui.screens.grupos import Groups, EditGroup, CreateGroup
+from gui.screens.grupos import Groups, EditGroup, CreateGroup, SeeGroup
 from gui.screens.reservas import Reserves, EditReserve, CreateReserve
 from gui.screens.suspensoes import Suspensions, EditSuspension, CreateSuspension
-
-from gui.screens.turma import Classes, EditClass, CreateClass
+from gui.screens.turma import Classes, EditClass, CreateClass, SeeClass
 
 # Configurations
 from config.database import *
-
-# Tables and Connections
-# from database import Connection
 
 if __name__ == "__main__":
     app = Application(fg_color="#ffffff")
@@ -36,10 +32,10 @@ if __name__ == "__main__":
         "edit_atts": EditSecretary(app.layout.frame),
         "create_att": CreateSecretary(app.layout.frame),
 
-
         "categories": Categories(app.layout.frame),
         "edit_categories": EditCategory(app.layout.frame),
         "create_category": CreateCategory(app.layout.frame),
+        "see_category": SeeCategory(app.layout.frame),
 
         "loans": Loans(app.layout.frame),
         "edit_loans": EditLoan(app.layout.frame),
@@ -48,6 +44,7 @@ if __name__ == "__main__":
         "groups": Groups(app.layout.frame),
         "edit_groups": EditGroup(app.layout.frame),
         "create_group": CreateGroup(app.layout.frame),
+        "see_group": SeeGroup(app.layout.frame),
 
         "reserves": Reserves(app.layout.frame),
         "edit_reserves": EditReserve(app.layout.frame),
@@ -60,6 +57,7 @@ if __name__ == "__main__":
         "classes": Classes(app.layout.frame),
         "edit_classes": EditClass(app.layout.frame),
         "create_class": CreateClass(app.layout.frame),
+        "see_class": SeeClass(app.layout.frame)
     }
     RouteManager.app = app
 

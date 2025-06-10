@@ -82,7 +82,7 @@ class Groups(Screen):
 
         groups = pd.read_csv("gui/screens/csv/groups.csv")
 
-        table = Table(self.app, "edit_groups")
+        table = Table(self.app, "edit_groups", "see_group")
 
         pagination = {
             "registros": groups,
@@ -345,3 +345,74 @@ class CreateGroup(Screen):
             corner_radius=10
         )
         confirm_button.grid(row=i+1, column=0, ipady=5, sticky="w", padx=10, pady=(10, 10))
+
+
+class SeeGroup(Screen):
+    def __init__(self, app):
+        self.app = app
+
+    def build(self, *args, **kwargs):
+        group = args[0]
+
+        title_frame = ctk.CTkFrame(
+            self.app,
+            fg_color="transparent"
+        )
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        title = ctk.CTkLabel(
+            title_frame,
+            text=f"{group.nomegru}",
+            font=("Arial", 20, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        title.grid(column=0, row=0, sticky="w")
+
+        description = ctk.CTkLabel(
+            title_frame,
+            text=f"Veja os livros no grupo {group.nomegru}",
+            font=("Arial", 15, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        description.grid(column=0, row=1, sticky="w")
+
+        cancel_button = ctk.CTkButton(
+            title_frame,
+            command=lambda: RouteManager.go_back(),
+            fg_color="#ffffff",
+            hover_color=Colors.GRAY.c_100,
+            text_color=Colors.GRAY.c_800,
+            border_color=Colors.GRAY.c_300,
+            border_width=1,
+            text="Voltar",
+            font=("Arial", 13, "bold"),
+            width=100,
+            corner_radius=10
+        )
+        cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
+
+        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
+
+        self.app.grid_rowconfigure(1, weight=1)
+        self.app.grid_columnconfigure(0, weight=1)
+
+        books = pd.read_csv("gui/screens/csv/books.csv")
+
+        books = books[books["idgru"]==group["idgru"]]
+
+        table = Table(self.app, "edit_books")
+
+        pagination = {
+            "registros": books,
+            "total_registros": 10,
+            "registros_por_pagina": 10,
+            "total_paginas": 1,
+            "pagina_atual": 1
+        }
+
+        table.build(pagination)

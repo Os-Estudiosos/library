@@ -93,7 +93,7 @@ class Classes(Screen):
             "pagina_atual": 1
         }
 
-        table = Table(self.app, "edit_classes")
+        table = Table(self.app, "edit_classes", "see_class")
         table.build(pagination)
 
 
@@ -252,3 +252,72 @@ class CreateClass(Screen):
     
     def send(self):
         pass
+
+
+class SeeClass(Screen):
+    def __init__(self, app):
+        self.app = app
+
+    def build(self, *args, **kwargs):
+        actual_class = args[0]
+
+        title_frame = ctk.CTkFrame(
+            self.app,
+            fg_color="transparent"
+        )
+        title_frame.rowconfigure(0, weight=1)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(0, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        title = ctk.CTkLabel(
+            title_frame,
+            text=f"{actual_class.nometurma}",
+            font=("Arial", 20, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        title.grid(column=0, row=0, sticky="w")
+
+        description = ctk.CTkLabel(
+            title_frame,
+            text=f"Alunos presentes na turma {actual_class.nometurma}",
+            font=("Arial", 15, "bold"),
+            text_color=Colors.SLATE.c_900,
+            justify="left"
+        )
+        description.grid(column=0, row=1, sticky="w")
+
+        cancel_button = ctk.CTkButton(
+            title_frame,
+            command=lambda: RouteManager.go_back(),
+            fg_color="#ffffff",
+            hover_color=Colors.GRAY.c_100,
+            text_color=Colors.GRAY.c_800,
+            border_color=Colors.GRAY.c_300,
+            border_width=1,
+            text="Voltar",
+            font=("Arial", 13, "bold"),
+            width=100,
+            corner_radius=10
+        )
+        cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
+
+        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
+
+        self.app.grid_rowconfigure(1, weight=1)
+        self.app.grid_columnconfigure(0, weight=1)
+
+        students = pd.read_csv("gui/screens/csv/students.csv")
+        students = students[students["idturma"] == actual_class.idturma]
+
+        pagination = {
+            "registros": students,
+            "total_registros": len(students),
+            "registros_por_pagina": len(students),
+            "total_paginas": 1,
+            "pagina_atual": 1
+        }
+
+        table = Table(self.app, "edit_students")
+        table.build(pagination)
