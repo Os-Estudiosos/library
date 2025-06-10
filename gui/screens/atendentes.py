@@ -8,10 +8,13 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Secretaries(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -80,30 +83,27 @@ class Secretaries(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        atts = pd.read_csv("gui/screens/csv/atts.csv")
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_atts")
+        pagination = TablesManager.atendenteTable.read(qtd=self.items_per_page, pagina=page)
 
-        pagination = {
-            "registros": atts,
-            "total_registros": 8,
-            "registros_por_pagina": 8,
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_atts", TablesManager.atendenteTable, "cpfatt")
         table.build(pagination)
 
 
 class EditSecretary(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_cpfatt = None
     
     def build(self, *args, **kwargs):
-        att = args[0]
+        self.current_cpfatt = args[0]["cpfatt"]
+        att = TablesManager.atendenteTable.read_one(
+            cpfatt=self.current_cpfatt,
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -183,6 +183,13 @@ class EditSecretary(Screen):
             ]
         )
         self.forms.build(self.send, att)
+    
+    def send(self):
+        values = self.forms.get_values()
+        TablesManager.atendenteTable.update({
+            "cpfatt": self.current_cpfatt,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateSecretary(Screen):
@@ -271,3 +278,12 @@ class CreateSecretary(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        cpf = values["cpfatt"]
+        del values["cpfatt"]
+        TablesManager.atendenteTable.create({
+            "cpfatt": cpf,
+        },values)
+        RouteManager.go_back()

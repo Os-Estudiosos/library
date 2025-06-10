@@ -89,7 +89,7 @@ class CategoriaTable:
 
             registro = cursor.fetchall()
             cursor.close()
-            return pd.Series(*registro, index=["idcat","nometurma"])
+            return pd.Series(*registro, index=["idcat","nomecat"])
         except Exception as e:
             print("Erro ao ler:", e)
             if cursor:

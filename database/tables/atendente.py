@@ -86,11 +86,11 @@ class AtendenteTable:
         cursor = None
         try:
             cursor = self.conn.cursor()
-            cursor.execute(f"SELECT * FROM {self.name} WHERE cpfatt='%s';", (cpfatt,))
+            cursor.execute(f"SELECT * FROM {self.name} WHERE cpfatt=%s;", (cpfatt,))
 
             registro = cursor.fetchall()
             cursor.close()
-            return pd.Series(*registro, index=["cpfatt","nometurma"])
+            return pd.Series(*registro, index=["cpfatt","primeironomeatt", "ultimonomeatt"])
         except Exception as e:
             print("Erro ao ler:", e)
             if cursor:
