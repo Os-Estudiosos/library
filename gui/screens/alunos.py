@@ -19,7 +19,7 @@ class Students(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, *args):
         if args[0] is not None:
             page = args[0]
         else:

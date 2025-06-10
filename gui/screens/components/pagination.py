@@ -3,6 +3,8 @@ from config.colors import Colors
 from PIL import Image
 import os
 
+from gui.manager.routemanager import RouteManager
+
 
 class Pagination:
     def __init__(self, master, pagination):
@@ -51,8 +53,9 @@ class Pagination:
             fg_color="#fff",
             hover_color=Colors.GRAY.c_200,
             text_color=Colors.GRAY.c_500,
-            command=lambda: print(f"Anterior"),
+            command=lambda: RouteManager.go_to(RouteManager.active, self.pagination["pagina_atual"]-1),
             image=arrow_left_image_ctk,
+            state="disabled" if self.pagination["pagina_atual"]==1 else "normal",
             width=30,
             text="",
             corner_radius=0
@@ -101,28 +104,32 @@ class Pagination:
 
                 continue
 
+            def btn_callback(page=i):
+                RouteManager.go_to(RouteManager.active, page+1)
+
             i_btn = ctk.CTkButton(
                 internal_buttons_frame,
                 fg_color=Colors.INDIGO.c_600 if i+1 == self.pagination["pagina_atual"] else "#fff",
                 text_color_disabled="#fff",
                 hover_color=Colors.INDIGO.c_600 if i+1 == self.pagination["pagina_atual"] else Colors.GRAY.c_200,
                 text_color="#fff" if i+1 == self.pagination["pagina_atual"] else Colors.GRAY.c_500,
-                command=lambda: print(f"Pagina {i+1}"),
+                command=btn_callback,
                 text=f"{i+1}",
                 width=30,
                 state="disabled" if i+1 == self.pagination["pagina_atual"] else "normal",
                 corner_radius=0
             )
             i_btn.grid(row=0, column=i+1, padx=(2, 0))
-        
+
         arrow_right_btn = ctk.CTkButton(
             internal_buttons_frame,
             fg_color="#fff",
             hover_color=Colors.GRAY.c_200,
             text_color=Colors.GRAY.c_500,
-            command=lambda: print(f"Próximo"),
+            command=lambda: RouteManager.go_to(RouteManager.active, self.pagination["pagina_atual"]+1),
             image=arrow_right_image_ctk,
             width=30,
+            state="disabled" if self.pagination["pagina_atual"]==self.pagination["total_paginas"] else "normal",
             text="",
             corner_radius=0
         )
