@@ -60,7 +60,7 @@ class EmprestimoTable:
                     Emprestimo.BaixaEmp,
                     Emprestimo.MatriculaAl,
                     Emprestimo.ISBNLiv,
-                    Emprestimo.CPFAtt,
+                    Emprestimo.CPFAtt
                 {base_sql}
             """
             params = []

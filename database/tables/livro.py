@@ -59,7 +59,7 @@ class LivroTable:
                     Livro.EditoraLiv,
                     Livro.EdicaoLiv,
                     Livro.AnoLancamentoLiv,
-                    Livro.IdGru,
+                    Livro.IdGru
                 {base_sql}
             """
             params = []

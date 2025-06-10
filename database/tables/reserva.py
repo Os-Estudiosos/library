@@ -57,14 +57,14 @@ class ReservaTable:
                 SELECT Reserva.IdRes,
                     Reserva.DataRes,
                     Reserva.MatriculaAl,
-                    Reserva.ISBNLiv,
+                    Reserva.ISBNLiv
                 {base_sql}
             """
             params = []
             if filter:
                 sql += f" WHERE {where_clause}"
                 params.extend(filter.values())
-            sql += " ORDER BY Aluno.MatriculaAl LIMIT %s OFFSET %s"
+            sql += " ORDER BY Reserva.MatriculaAl LIMIT %s OFFSET %s"
             params.extend([registros_por_pagina, offset])
             cursor.execute(sql, tuple(params))
             registros = cursor.fetchall()
@@ -96,7 +96,7 @@ class ReservaTable:
                 print("Nenhum registro encontrado.")
                 return None
             cursor.close()
-            return pd.Series(registro, index=["idres", "datares", "matriculaal", "matriculaal"])
+            return pd.Series(registro, index=["idres", "datares", "matriculaal", "isbnliv"])
         except Exception as e:
             print("Erro ao ler:", e)
             if cursor:

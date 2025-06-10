@@ -46,7 +46,7 @@ class SearchSelect:
         self.boxoption = None
         self.options = None
 
-        qtd = self.table.read()["total_registros"]
+        qtd = self.table.read()['total_registros']
         self.dataframe = self.table.read(qtd=qtd)["registros"]
 
         self.restart(**kwargs)

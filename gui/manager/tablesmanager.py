@@ -6,6 +6,7 @@ from database.tables.aluno import AlunoTable
 from database.tables.livro import LivroTable
 from database.tables.suspensao import SuspensaoTable
 from database.tables.turma import TurmaTable
+from database.tables.reserva import ReservaTable
 
 connection = Connection(
     db_name=DB_NAME,
@@ -18,7 +19,8 @@ connection.initialize()
 
 class TablesManager:
     connection=connection
-
+    
+    reservaTable = ReservaTable(connection)
     atendenteTable = AtendenteTable(connection)
     alunoTable = AlunoTable(connection)
     livroTable = LivroTable(connection)

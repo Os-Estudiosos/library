@@ -8,10 +8,13 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Reserves(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -80,18 +83,14 @@ class Reserves(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        reserves = pd.read_csv("gui/screens/csv/reserves.csv")
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_reserves")
+        pagination = TablesManager.reservaTable.read(qtd=self.items_per_page, pagina=page)
 
-        pagination = {
-            "registros": reserves.head(10),
-            "total_registros": 40,
-            "registros_por_pagina": 10,
-            "total_paginas": 4,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_reserves", TablesManager.reservaTable, ("idres", "matriculaal"))
         table.build(pagination)
 
 
@@ -99,11 +98,18 @@ class EditReserve(Screen):
     def __init__(self, app):
         self.app = app
 
-    def send(self):
-        RouteManager.go_back()
+        self.current_idres = None
+        self.current_matriculaal = None
     
     def build(self, *args, **kwargs):
-        reserve = args[0]
+        self.current_idres = args[0]["idres"]
+        self.current_matriculaal = args[0]["matriculaal"]
+        reserve = TablesManager.reservaTable.read_one(
+            idres=self.current_idres,
+            matriculaal=self.current_matriculaal
+        )
+
+        print(reserve)
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -163,14 +169,14 @@ class EditReserve(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
                 "isbnliv": {
                     "label": "Livro:",
                     "intype": "search",
-                    "table": "books",
+                    "table": TablesManager.livroTable,
                     "exihibition_column": "nomeliv",
                     "value_column": "isbnliv"
                 },
@@ -187,6 +193,14 @@ class EditReserve(Screen):
             ]
         )
         self.forms.build(self.send, reserve)
+
+    def send(self):
+        values = self.forms.get_values()
+        TablesManager.reservaTable.update({
+            "idres": self.current_idres,
+            "matriculaal": self.current_matriculaal,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateReserve(Screen):
@@ -255,14 +269,14 @@ class CreateReserve(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
                 "isbnliv": {
                     "label": "Livro:",
                     "intype": "search",
-                    "table": "books",
+                    "table": TablesManager.livroTable,
                     "exihibition_column": "nomeliv",
                     "value_column": "isbnliv"
                 },
@@ -279,3 +293,14 @@ class CreateReserve(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        new_values = values.copy()
+        del new_values["matriculaal"]
+        current_idres = TablesManager.reservaTable.read()["total_registros"]
+        TablesManager.reservaTable.create({
+            "idres": current_idres+1,
+            "matriculaal": values["matriculaal"],
+        },new_values)
+        RouteManager.go_back()
