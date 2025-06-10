@@ -1,102 +1,136 @@
 from database import Connection
 from database.tables import Table
+import pandas as pd
 
 class EmprestimoTable:
-    
-    def __init__(self, connection:Connection):
-        self.conn = connection
-        self.values = "(IdEmp, DataInicioEmp, DataFimEmp, BaixaEmp, MatriculaAl, ISBNLiv, CPFAtt)"
-        self.name = "Emprestimo"
+            
+    def __init__(self, connection: Connection):
+            self.conn = connection
+            self.name = "Emprestimo"
 
-    def create(self, id_emp, data_inicio_emp, data_fim_emp, baixa_emp, matricula_al, isbn_liv, cpf_att):
+    def create(self, primary_key: dict, colums: dict):
         try:
+            all_columns = list(primary_key.keys()) + list(colums.keys())
+            all_values = list(primary_key.values()) + list(colums.values())
+            col_names = ', '.join(all_columns)
+            placeholders = ', '.join(['%s'] * len(all_columns))
+            conflict_key = ', '.join(primary_key.keys())
+            update_set = ', '.join([f"{col} = EXCLUDED.{col}" for col in colums.keys()])
             sql = f"""
-            INSERT INTO {self.name} {self.values} VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (IdEmp, MatriculaAl) DO UPDATE SET
-            DataInicioEmp = EXCLUDED.DataInicioEmp,
-            DataFimEmp = EXCLUDED.DataFimEmp,
-            BaixaEmp = EXCLUDED.BaixaEmp,
-            ISBNLiv = EXCLUDED.ISBNLiv,
-            CPFAtt = EXCLUDED.CPFAtt;
+            INSERT INTO {self.name} ({col_names})
+            VALUES ({placeholders})
+            ON CONFLICT ({conflict_key}) DO UPDATE SET
+            {update_set};
             """
             cursor = self.conn.cursor()
-            cursor.execute(sql, (id_emp, data_inicio_emp, data_fim_emp, baixa_emp, matricula_al, isbn_liv, cpf_att))
+            cursor.execute(sql, all_values)
             self.conn.commit()
-            print(f"{self.name} inserido com sucesso.")
+            cursor.close()
+            print(f"{self.name} inserida ou atualizada com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao inserir:", e)
-        finally:
-            cursor.close()
 
-    def read(self, qtd=15, pagina=1, filter=None):
-        dict = {}
+    def read(self, filter: dict = None, qtd=15, pagina=1):
+        resultado = {}
+        cursor = None
         try:
             cursor = self.conn.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM {self.name};")
-            total_registros = cursor.fetchone()[0]
-            
-            if qtd <= 0:
-                print("Quantidade de registros por página deve ser maior que zero.")
-                return {}
-            if qtd > total_registros:
-                qtd = total_registros
-            
-            registros_por_pagina = qtd
-            total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
-            dict["total_registros"] = total_registros
-            dict["registros_por_pagina"] = registros_por_pagina
-            dict["total_paginas"] = total_paginas
-            dict["pagina_atual"] = pagina
-            
-            offset = (pagina - 1) * qtd
-            sql = f"SELECT * FROM {self.name} LIMIT %s OFFSET %s"
-            params = [qtd, offset]
-            
+            base_sql = f"""
+                FROM {self.name}
+                INNER JOIN Aluno ON Emprestimo.MatriculaAl = Aluno.MatriculaAl
+                INNER JOIN Atendente ON Emprestimo.CPFAtt = Atendente.CPFAtt
+                INNER JOIN Livro ON Emprestimo.ISBNLiv = Livro.ISBNLiv
+            """
             if filter:
-                filter_conditions = " AND ".join([f"{k} = %s" for k in filter.keys()])
-                sql = f"SELECT * FROM {self.name} WHERE {filter_conditions} LIMIT %s OFFSET %s"
-                params = list(filter.values()) + [qtd, offset]
-            
+                where_clause = " AND ".join([f"Emprestimo.{k} = %s" for k in filter.keys()])
+                count_sql = f"SELECT COUNT(*) {base_sql} WHERE {where_clause};"
+                cursor.execute(count_sql, list(filter.values()))
+            else:
+                count_sql = f"SELECT COUNT(*) {base_sql};"
+                cursor.execute(count_sql)
+            total_registros = cursor.fetchone()[0]
+            if total_registros == 0:
+                print("Nenhum registro encontrado.")
+                return {}
+            registros_por_pagina = min(qtd, total_registros)
+            total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
+            offset = (pagina - 1) * registros_por_pagina
+            sql = f"""
+                SELECT Emprestimo.IdEmp,
+                    Emprestimo.DataInicioEmp,
+                    Emprestimo.DataFimEmp,
+                    Emprestimo.BaixaEmp,
+                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
+                    CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompletoAtt,
+                    Livro.NomeLiv
+                {base_sql}
+            """
+            params = []
+            if filter:
+                sql += f" WHERE {where_clause}"
+                params.extend(filter.values())
+            sql += " ORDER BY Emprestimo.DataInicioEmp LIMIT %s OFFSET %s"
+            params.extend([registros_por_pagina, offset])
             cursor.execute(sql, tuple(params))
-            dict["registros"] = cursor.fetchall()
-            cursor.close()
-            return dict
+            registros = cursor.fetchall()
+            resultado.update({
+                "total_registros": total_registros,
+                "registros_por_pagina": registros_por_pagina,
+                "total_paginas": total_paginas,
+                "pagina_atual": pagina,
+                "registros": pd.DataFrame(registros, columns=[
+                    "ID Emprestimo", "Data início", "Data fim", "Baixa",
+                    "Nome Aluno", "Nome Atendente", "Nome Livro"
+                ])
+            })
+            return resultado
         except Exception as e:
             print("Erro ao ler:", e)
             return {}
 
-    def update(self, id_emp, data_inicio_emp, data_fim_emp, baixa_emp, matricula_al, isbn_liv, cpf_att):
+    def update(self, primary_key: dict, colums: dict):
         try:
-            sql = f"UPDATE {self.name} SET DataInicioEmp = %s, DataFimEmp = %s, BaixaEmp = %s, ISBNLiv = %s, CPFAtt = %s WHERE IdEmp = %s AND MatriculaAl = %s;"
-            cursor = self.conn.cursor()
-            cursor.execute(sql, (data_inicio_emp, data_fim_emp, baixa_emp, isbn_liv, cpf_att, id_emp, matricula_al))
-            if cursor.rowcount == 0:
-                print(f"{self.name} com IdEmp {id_emp} e MatriculaAl {matricula_al} não encontrado.")
+            if not primary_key or not colums:
+                print("Chave primária e colunas a atualizar não podem estar vazias.")
                 return
+            set_clause = ', '.join([f"{col} = %s" for col in colums.keys()])
+            where_clause = ' AND '.join([f"{pk} = %s" for pk in primary_key.keys()])
+            values = list(colums.values()) + list(primary_key.values())
+            sql = f"""
+            UPDATE {self.name}
+            SET {set_clause}
+            WHERE {where_clause};
+            """
+            cursor = self.conn.cursor()
+            cursor.execute(sql, values)
             self.conn.commit()
-            print(f"{self.name} atualizado com sucesso.")
+            cursor.close()
+            print(f"{self.name} atualizada com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao atualizar:", e)
-        finally:
-            cursor.close()
 
-    def delete(self, id_emp, matricula_al):
+    def delete(self, primary_key: dict):
         try:
-            sql = f"DELETE FROM {self.name} WHERE IdEmp = %s AND MatriculaAl = %s;"
+            if not primary_key:
+                print("Chave primária não pode estar vazia.")
+                return
+            where_clause = ' AND '.join([f"{pk} = %s" for pk in primary_key.keys()])
+            values = list(primary_key.values())
+            sql = f"DELETE FROM {self.name} WHERE {where_clause};"
             cursor = self.conn.cursor()
-            cursor.execute(sql, (id_emp, matricula_al))
+            cursor.execute(sql, values)
             if cursor.rowcount == 0:
-                print(f"{self.name} com IdEmp {id_emp} e MatriculaAl {matricula_al} não encontrado.")
+                print(f"{self.name} com os critérios {primary_key} não encontrada.")
+                cursor.close()
                 return
             self.conn.commit()
-            print(f"{self.name} excluído com sucesso.")
+            cursor.close()
+            print(f"{self.name} excluída com sucesso.")
         except Exception as e:
             self.conn.rollback()
             print("Erro ao excluir:", e)
-        finally:
-            cursor.close()
 
     def close(self):
         if self.conn:
