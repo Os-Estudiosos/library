@@ -1,6 +1,7 @@
 from gui.screens import Screen
 import customtkinter as ctk
 import pandas as pd
+import numpy as np
 from config.colors import Colors
 import tkinter as tk
 
@@ -103,12 +104,13 @@ class Students(Screen):
 class EditStudent(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_matriculaal = None
     
     def build(self, *args, **kwargs):
-        student = args[0]
+        self.current_matriculaal = args[0]["matriculaal"]
+        student = TablesManager.alunoTable.read_one(
+            matriculaal=self.current_matriculaal,
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -188,7 +190,7 @@ class EditStudent(Screen):
                 "idturma": {
                     "label": "Turma do Aluno:",
                     "intype": "search",
-                    "table": "classes",
+                    "table": TablesManager.turmaTable,
                     "exihibition_column": "nometurma",
                     "value_column": "idturma"
                 }
@@ -209,14 +211,22 @@ class EditStudent(Screen):
         )
 
         self.forms.build(self.send, student)
+    
+    def send(self):
+        values = self.forms.get_values()
+        for k, v in values.items():
+            if isinstance(v, np.int64):
+                values[k] = int(v)
+        del values["matriculaal"]
+        TablesManager.alunoTable.update({
+            "matriculaal": self.current_matriculaal,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateStudent(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
     
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -304,7 +314,7 @@ class CreateStudent(Screen):
                 "idturma": {
                     "label": "Turma do Aluno:",
                     "intype": "search",
-                    "table": "classes",
+                    "table": TablesManager.turmaTable,
                     "exihibition_column": "nometurma",
                     "value_column": "idturma"
                 }
@@ -324,3 +334,15 @@ class CreateStudent(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        for k, v in values.items():
+            if isinstance(v, np.int64):
+                values[k] = int(v)
+        matriculaal = values["matriculaal"]
+        del values["matriculaal"]
+        TablesManager.alunoTable.create({
+            "matriculaal": matriculaal,
+        },values)
+        RouteManager.go_back()

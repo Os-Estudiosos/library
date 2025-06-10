@@ -87,7 +87,7 @@ class AlunoTable:
         cursor = None
         try:
             cursor = self.conn.cursor()
-            cursor.execute(f"SELECT * FROM {self.name} WHERE matriculaal='%s';", (matriculaal,))
+            cursor.execute(f"SELECT * FROM {self.name} WHERE matriculaal=%s;", (matriculaal,))
 
             registro = cursor.fetchall()
             cursor.close()
