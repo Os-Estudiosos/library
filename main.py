@@ -6,7 +6,7 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.alunos import Students, EditStudent, CreateStudent
 from gui.screens.livros import Books, EditBook, CreateBook
 from gui.screens.atendentes import Secretaries, EditSecretary, CreateSecretary
-from gui.screens.categorias import Categories, EditCategory, CreateCategory
+from gui.screens.categorias import Categories, EditCategory, CreateCategory, SeeCategory
 from gui.screens.emprestimos import Loans, EditLoan, CreateLoan
 from gui.screens.grupos import Groups, EditGroup, CreateGroup, SeeGroup
 from gui.screens.reservas import Reserves, EditReserve, CreateReserve
@@ -35,6 +35,7 @@ if __name__ == "__main__":
         "categories": Categories(app.layout.frame),
         "edit_categories": EditCategory(app.layout.frame),
         "create_category": CreateCategory(app.layout.frame),
+        "see_category": SeeCategory(app.layout.frame),
 
         "loans": Loans(app.layout.frame),
         "edit_loans": EditLoan(app.layout.frame),
@@ -59,20 +60,6 @@ if __name__ == "__main__":
         "see_class": SeeClass(app.layout.frame)
     }
     RouteManager.app = app
-
-    # connection = Connection(
-    #     db_name=DB_NAME,
-    #     host=DB_HOST,
-    #     path=DB_PATH,
-    #     password=DB_PASSWORD,
-    #     user=DB_OWNER
-    # )
-
-    # TablesManager.atendenteTable = AtendenteTable(connection)
-    # TablesManager.alunoTable = AlunoTable(connection)
-    # TablesManager.livroTable = LivroTable(connection)
-    # TablesManager.suspensaoTable = SuspensaoTable(connection)
-    # TablesManager.turmaTable = TurmaTable(connection)
 
     app.initialize()
     app.mainloop()

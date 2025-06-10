@@ -10,6 +10,9 @@ from database.tables.reserva import ReservaTable
 from database.tables.grupo import GrupoTable
 from database.tables.emprestimo import EmprestimoTable
 from database.tables.categoria import CategoriaTable
+from database.tables.lipertencecat import LiPertenceCatTable
+from database.tables.autorlivro import AutorLivroTable
+from database.tables.alfavoritaliv import AlFavoritaLivTable
 
 connection = Connection(
     db_name=DB_NAME,
@@ -32,3 +35,7 @@ class TablesManager:
     livroTable = LivroTable(connection)
     suspensaoTable = SuspensaoTable(connection)
     turmaTable = TurmaTable(connection)
+
+    lipertencecatTable = LiPertenceCatTable(connection)
+    autorlivroTable = AutorLivroTable(connection)
+    alfavoritalivTable = AlFavoritaLivTable(connection)

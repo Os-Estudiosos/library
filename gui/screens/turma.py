@@ -7,6 +7,7 @@ import tkinter as tk
 
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -17,9 +18,9 @@ class Classes(Screen):
 
         self.items_per_page=10
 
-    def build(self, *args, **kwargs):
-        if args[0] is not None:
-            page = args[0]
+    def build(self, **kwargs):
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
@@ -94,8 +95,12 @@ class Classes(Screen):
 
         pagination = TablesManager.turmaTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_classes", TablesManager.turmaTable, "idturma", "see_class")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_classes", TablesManager.turmaTable, "idturma", "see_class")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditClass(Screen):
@@ -104,8 +109,8 @@ class EditClass(Screen):
 
         self.current_id = None
     
-    def build(self, *args, **kwargs):
-        self.current_id = args[0]["idturma"]
+    def build(self, **kwargs):
+        self.current_id = kwargs["entry"]["idturma"]
         library_class = TablesManager.turmaTable.read_one(
             idturma=self.current_id,
         )
@@ -267,8 +272,8 @@ class SeeClass(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
-        actual_class = args[0]
+    def build(self, **kwargs):
+        actual_class = kwargs["entry"]
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -299,7 +304,7 @@ class SeeClass(Screen):
 
         cancel_button = ctk.CTkButton(
             title_frame,
-            command=lambda: RouteManager.go_back(),
+            command=lambda: RouteManager.go_to("classes"),
             fg_color="#ffffff",
             hover_color=Colors.GRAY.c_100,
             text_color=Colors.GRAY.c_800,
@@ -317,14 +322,18 @@ class SeeClass(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        if len(args) >= 2 and args[1] is not None:
-            page = args[1]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
-
+        
         pagination = TablesManager.alunoTable.read(filter={
             "idturma": int(actual_class.idturma)
         }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()

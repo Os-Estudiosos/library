@@ -7,6 +7,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -16,9 +17,9 @@ class Suspensions(Screen):
         self.app = app
         self.items_per_page=10
 
-    def build(self, *args, **kwargs):
-        if args[0] is not None:
-            page = args[0]
+    def build(self, **kwargs):
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
         
@@ -90,8 +91,12 @@ class Suspensions(Screen):
 
         pagination = TablesManager.suspensaoTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_suspensions", TablesManager.suspensaoTable, ("idsusp", "matriculaal"))
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_suspensions", TablesManager.suspensaoTable, ("idsusp", "matriculaal"))
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditSuspension(Screen):
@@ -100,9 +105,9 @@ class EditSuspension(Screen):
         self.current_matriculaal = None
         self.current_idsusp = None
     
-    def build(self, *args, **kwargs):
-        self.current_idsusp = args[0]["idsusp"]
-        self.current_matriculaal = args[0]["matriculaal"]
+    def build(self, **kwargs):
+        self.current_idsusp = kwargs["entry"]["idsusp"]
+        self.current_matriculaal = kwargs["entry"]["matriculaal"]
         suspension = TablesManager.suspensaoTable.read_one(
             idsusp=self.current_idsusp,
             matriculaal=self.current_matriculaal

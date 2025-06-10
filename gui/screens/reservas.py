@@ -7,6 +7,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -16,7 +17,7 @@ class Reserves(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,15 +84,19 @@ class Reserves(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
         pagination = TablesManager.reservaTable.read(qtd=self.items_per_page, pagina=page)
-
-        table = Table(self.app, "edit_reserves", TablesManager.reservaTable, ("idres", "matriculaal"))
-        table.build(pagination)
+        
+        if pagination:
+            table = Table(self.app, "edit_reserves", TablesManager.reservaTable, ("idres", "matriculaal"))
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditReserve(Screen):
@@ -101,9 +106,9 @@ class EditReserve(Screen):
         self.current_idres = None
         self.current_matriculaal = None
     
-    def build(self, *args, **kwargs):
-        self.current_idres = args[0]["idres"]
-        self.current_matriculaal = args[0]["matriculaal"]
+    def build(self, **kwargs):
+        self.current_idres = kwargs["entry"]["idres"]
+        self.current_matriculaal = kwargs["entry"]["matriculaal"]
         reserve = TablesManager.reservaTable.read_one(
             idres=self.current_idres,
             matriculaal=self.current_matriculaal

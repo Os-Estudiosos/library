@@ -8,6 +8,7 @@ from gui.manager.routemanager import RouteManager
 
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -19,7 +20,7 @@ class Books(Screen):
         self.app = app
         self.items_per_page = 10
 
-    def build(self, *args, **kwargs):
+    def build(self, **kwargs):
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -86,16 +87,19 @@ class Books(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-
-        if args[0] is not None:
-            page = args[0]
+        if "page" in kwargs.keys():
+            page = kwargs["page"]
         else:
             page = 1
 
         pagination = TablesManager.livroTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditBook(Screen):
@@ -104,7 +108,7 @@ class EditBook(Screen):
         self.current_isbnliv = None
     
     def build(self, *args, **kwargs):
-        self.current_isbnliv = args[0]["isbnliv"]
+        self.current_isbnliv = kwargs["entry"]["isbnliv"]
         book = TablesManager.livroTable.read_one(
             isbnliv=self.current_isbnliv,
         )
