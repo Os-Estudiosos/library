@@ -8,10 +8,13 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Loans(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -80,30 +83,30 @@ class Loans(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        loans = pd.read_csv("gui/screens/csv/loans.csv")
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_loans")
+        pagination = TablesManager.emprestimoTable.read(qtd=self.items_per_page, pagina=page)
 
-        pagination = {
-            "registros": loans.head(5),
-            "total_registros": 30,
-            "registros_por_pagina": 5,
-            "total_paginas": 6,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_loans", TablesManager.emprestimoTable, ("idemp", "matriculaal"))
         table.build(pagination)
 
 
 class EditLoan(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_idemp = None
+        self.current_matriculaal = None
     
     def build(self, *args, **kwargs):
-        loan = args[0]
+        self.current_idemp = args[0]["idemp"]
+        self.current_matriculaal = args[0]["matriculaal"]
+        loan = TablesManager.emprestimoTable.read_one(
+            idemp=self.current_idemp,
+            matriculaal=self.current_matriculaal
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -172,21 +175,21 @@ class EditLoan(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
                 "isbnliv": {
                     "label": "Livro:",
                     "intype": "search",
-                    "table": "books",
+                    "table": TablesManager.livroTable,
                     "exihibition_column": "nomeliv",
                     "value_column": "isbnliv"
                 },
                 "cpfatt": {
                     "label": "Atendente:",
                     "intype": "search",
-                    "table": "atts",
+                    "table": TablesManager.atendenteTable,
                     "exihibition_column": "primeironomeatt",
                     "value_column": "cpfatt"
                 },
@@ -206,14 +209,19 @@ class EditLoan(Screen):
             ]
         )
         self.forms.build(self.send, loan)
+    
+    def send(self):
+        values = self.forms.get_values()
+        TablesManager.emprestimoTable.update({
+            "idemp": self.current_idemp,
+            "matriculaal": self.current_matriculaal,
+        },values)
+        RouteManager.go_back() 
 
 
 class CreateLoan(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
     
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -290,21 +298,21 @@ class CreateLoan(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
                 "isbnliv": {
                     "label": "Livro:",
                     "intype": "search",
-                    "table": "books",
+                    "table": TablesManager.livroTable,
                     "exihibition_column": "nomeliv",
                     "value_column": "isbnliv"
                 },
                 "cpfatt": {
                     "label": "Atendente:",
                     "intype": "search",
-                    "table": "atts",
+                    "table": TablesManager.atendenteTable,
                     "exihibition_column": "primeironomeatt",
                     "value_column": "cpfatt"
                 },
@@ -324,3 +332,14 @@ class CreateLoan(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        new_values = values.copy()
+        del new_values["matriculaal"]
+        current_idres = TablesManager.emprestimoTable.read()["total_registros"]
+        TablesManager.emprestimoTable.create({
+            "idemp": current_idres+1,
+            "matriculaal": values["matriculaal"],
+        },new_values)
+        RouteManager.go_back()

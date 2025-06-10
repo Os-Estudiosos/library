@@ -8,6 +8,7 @@ from database.tables.suspensao import SuspensaoTable
 from database.tables.turma import TurmaTable
 from database.tables.reserva import ReservaTable
 from database.tables.grupo import GrupoTable
+from database.tables.emprestimo import EmprestimoTable
 
 connection = Connection(
     db_name=DB_NAME,
@@ -21,6 +22,7 @@ connection.initialize()
 class TablesManager:
     connection=connection
     
+    emprestimoTable = EmprestimoTable(connection)
     grupoTable = GrupoTable(connection)
     reservaTable = ReservaTable(connection)
     atendenteTable = AtendenteTable(connection)
