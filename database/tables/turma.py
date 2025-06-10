@@ -72,10 +72,7 @@ class TurmaTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "ID Turma", "Nome Turma"
-                ]),
-                "bruto": pd.DataFrame(
+                "registros": pd.DataFrame(
                     registros,
                     columns=["idturma", "nometurma"],
                 )

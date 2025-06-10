@@ -38,8 +38,6 @@ class ReservaTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Aluno ON Reserva.MatriculaAl = Aluno.MatriculaAl
-                INNER JOIN Livro ON Reserva.ISBNLiv = Livro.ISBNLiv
             """
             if filter:
                 where_clause = " AND ".join([f"Reserva.{k} = %s" for k in filter.keys()])
@@ -60,8 +58,6 @@ class ReservaTable:
                     Reserva.DataRes,
                     Reserva.MatriculaAl,
                     Reserva.ISBNLiv,
-                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeAluno,
-                    Livro.NomeLiv
                 {base_sql}
             """
             params = []
@@ -77,10 +73,7 @@ class ReservaTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "Id Reserva", "Data Reserva", "Matricula Aluno", "ISBN Livro", "Nome Aluno", "Nome Livro"
-                ]).drop(columns=["Matricula ALuno", "ISBN Livro"]),
-                "bruto": pd.DataFrame(
+                "registros": pd.DataFrame(
                     registros,
                     columns=["idres", "datares", "matriculaal", "isbnliv"],
                 )

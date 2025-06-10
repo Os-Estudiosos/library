@@ -55,7 +55,8 @@ class AtendenteTable:
             offset = (pagina - 1) * registros_por_pagina
             sql = f"""
                 SELECT Atendente.CPFAtt,
-                       CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompleto
+                Atendente.PrimeiroNomeAtt,
+                Atendente.UltimoNomeAtt
                 {base_sql}
             """
             params = []
@@ -72,10 +73,7 @@ class AtendenteTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "CPF", "Nome completo"
-                ]), 
-                "bruto": pd.DataFrame(registros, columns=["cpfatt", "nomeatt"])
+                "registros": pd.DataFrame(registros, columns=["cpfatt", "primeironomeatt", "ultimonomeatt"])
             })
             return resultado
         except Exception as e:

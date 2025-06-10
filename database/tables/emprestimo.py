@@ -38,9 +38,6 @@ class EmprestimoTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Aluno ON Emprestimo.MatriculaAl = Aluno.MatriculaAl
-                INNER JOIN Atendente ON Emprestimo.CPFAtt = Atendente.CPFAtt
-                INNER JOIN Livro ON Emprestimo.ISBNLiv = Livro.ISBNLiv
             """
             if filter:
                 where_clause = " AND ".join([f"Emprestimo.{k} = %s" for k in filter.keys()])
@@ -64,9 +61,6 @@ class EmprestimoTable:
                     Emprestimo.MatriculaAl,
                     Emprestimo.ISBNLiv,
                     Emprestimo.CPFAtt,
-                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
-                    CONCAT(Atendente.PrimeiroNomeAtt, ' ', Atendente.UltimoNomeAtt) AS NomeCompletoAtt,
-                    Livro.NomeLiv
                 {base_sql}
             """
             params = []
@@ -82,14 +76,9 @@ class EmprestimoTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "ID Emprestimo", "Data início", "Data fim", "Baixa", "Matricula Aluno",
-                    "ISBN Livro", "CPF Att", "Nome Aluno", "Nome Atendente", "Nome Livro"
-                ]).drop(columns=["Matricula Aluno", "ISBN Livro", "CPF Att"]),
-                "bruto": pd.DataFrame(
-                    registros,
-                    columns=["idemp", "datainicioemp", "datafimemp", "baixaemp", "matriculaal", 
-                             "isbnliv", "cpfatt", "nomeal", "nomeatt", "nomeliv"]).drop(columns=["nomeal", "nomeatt", "nomeliv"])
+                "registros": pd.DataFrame(registros, columns=["idemp", "datainicioemp", 
+                                                            "datafimemp", "baixaemp", "matriculaal", 
+                                                            "isbnliv", "cpfatt"])
             })
             return resultado
         except Exception as e:

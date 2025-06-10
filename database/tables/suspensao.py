@@ -38,7 +38,6 @@ class SuspensaoTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Aluno ON Suspensao.MatriculaAl = Aluno.MatriculaAl
             """
             if filter:
                 where_clause = " AND ".join([f"Suspensao.{k} = %s" for k in filter.keys()])
@@ -58,7 +57,6 @@ class SuspensaoTable:
                 SELECT Suspensao.IdSusp,
                     Suspensao.DataInicioSusp,
                     Suspensao.DataFimSusp,
-                    CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
                     Suspensao.MatriculaAl
                 {base_sql}
             """
@@ -76,10 +74,7 @@ class SuspensaoTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "Id Suspensão", "Data Início", "Data Fim", "Nome Aluno", "Matricula"
-                ]).drop(columns=["Matricula"]),
-                "bruto": pd.DataFrame(
+                "registros": pd.DataFrame(
                     registros,
                     columns=["idsusp", "datainiciosusp", "datafimsusp", "matriculaal"],
                 )

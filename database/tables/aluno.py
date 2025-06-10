@@ -37,7 +37,6 @@ class AlunoTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Turma ON Aluno.IdTurma = Turma.IdTurma
             """
             if filter:
                 where_clause = " AND ".join([f"Aluno.{k} = %s" for k in filter.keys()])
@@ -55,13 +54,11 @@ class AlunoTable:
             offset = (pagina - 1) * registros_por_pagina
             sql = f"""
                 SELECT Aluno.MatriculaAl,
-                SELECT Aluno.PrimeiroNomeAl,
-                SELECT Aluno.UltimoNomeAl,
+                Aluno.PrimeiroNomeAl,
+                Aluno.UltimoNomeAl,
                 Aluno.DataNascimentoAl,
                 Aluno.SenhaAl,
                 Aluno.IdTurma,
-                CONCAT(Aluno.PrimeiroNomeAl, ' ', Aluno.UltimoNomeAl) AS NomeCompleto,
-                Turma.NomeTurma
                 {base_sql}
             """
             params = []
@@ -78,11 +75,8 @@ class AlunoTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "Matrícula", "primnome", "ultnome", "datanasc", "senha", "idturma", "Nome completo", "Turma"
-                ]).drop(columns=["primnome", "ultnome", "datanasc", "senha", "idturma"]), 
-                "bruto": pd.DataFrame(registros, columns=[
-                    "matriculaal", "primeironomeal", "ultimonomeal", "datanascimentoal", "senhaal", "idturma", "Nome completo", "Turma"
-                ]).drop(columns=["Nome completo", "Turma"])
+                    "matriculaal", "primeironomeal", "ultimonomeal", "datanascimentoal", "senhaal", "idturma"
+                ])
             })
             return resultado
         except Exception as e:

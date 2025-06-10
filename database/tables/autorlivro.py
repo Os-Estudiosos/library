@@ -72,10 +72,7 @@ class AutorLivroTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "Nome Autor", "ISBN Livro"
-                ]),
-                "bruto": pd.DataFrame(registros, columns=["autorliv", "isbnliv"])
+                "registros": pd.DataFrame(registros, columns=["autorliv", "isbnliv"])
             })
             return resultado
         except Exception as e:

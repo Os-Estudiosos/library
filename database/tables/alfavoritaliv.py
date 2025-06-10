@@ -73,9 +73,8 @@ class AlFavoritaLivTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "ISBN Livro", "Matrícula Aluno"
-                ]),
-                "bruto": pd.DataFrame(registros, columns=["isbnliv", "matriculaal"])
+                    "isbnliv", "matriculaal"
+                ])
             })
             return resultado
         except Exception as e:

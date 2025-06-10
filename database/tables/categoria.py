@@ -72,10 +72,7 @@ class CategoriaTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "ID Categoria", "Nome Categoria"
-                ]),
-                "bruto": pd.DataFrame(registros, columns=["idcat", "nomecat"])
+                "registros": pd.DataFrame(registros, columns=["idcat", "nomecat"])
             })
             return resultado
         except Exception as e:

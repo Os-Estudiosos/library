@@ -38,7 +38,6 @@ class LivroTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Grupo ON Livro.IdGru = Grupo.IdGru
             """
             if filter:
                 where_clause = " AND ".join([f"Livro.{k} = %s" for k in filter.keys()])
@@ -61,7 +60,6 @@ class LivroTable:
                     Livro.EdicaoLiv,
                     Livro.AnoLancamentoLiv,
                     Livro.IdGru,
-                    Grupo.NomeGru
                 {base_sql}
             """
             params = []
@@ -77,11 +75,7 @@ class LivroTable:
                 "registros_por_pagina": registros_por_pagina,
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
-                "registros": pd.DataFrame(registros, columns=[
-                    "ISBN Livro", "Nome Livro", "Editora Livro", "Edição Livro",
-                    "Ano Lançamento", "Id Grupo", "Grupo"
-                ]).drop(columns=["Id Grupo"]),
-                "bruto": pd.DataFrame(
+                "registros": pd.DataFrame(
                     registros,
                     columns=["isbnliv", "nomeliv", "editoraliv", "edicaoliv", "anolancamentoliv", "idgru"],
                 )

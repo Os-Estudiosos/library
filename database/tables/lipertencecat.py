@@ -73,9 +73,6 @@ class LiPertenceCatTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "ISBN Livro", "Id Categoria"
-                ]),
-                "bruto": pd.DataFrame(registros, columns=[
                     "isbnliv", "idcat"
                 ])
             })
