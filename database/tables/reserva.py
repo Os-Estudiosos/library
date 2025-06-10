@@ -38,8 +38,8 @@ class ReservaTable:
             cursor = self.conn.cursor()
             base_sql = f"""
                 FROM {self.name}
-                INNER JOIN Turma ON Reserva.MatriculaAl = Aluno.MatriculaAl
-                INNER JOIN Turma ON Reserva.ISBNLiv = Livro.ISBNLiv
+                INNER JOIN Aluno ON Reserva.MatriculaAl = Aluno.MatriculaAl
+                INNER JOIN Livro ON Reserva.ISBNLiv = Livro.ISBNLiv
             """
             if filter:
                 where_clause = " AND ".join([f"Reserva.{k} = %s" for k in filter.keys()])
