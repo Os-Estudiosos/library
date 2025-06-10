@@ -121,10 +121,14 @@ class Table:
 
                     edit_button = EditButton(self.go_on_edit, datapoint[1], actions_frame)
                     edit_button.grid(row=0, column=0, pady=5, padx=5, sticky="e")
+                    if isinstance(self.primary_key, tuple):
+                        entry = [datapoint[1][p_key] for p_key in self.primary_key]
+                    else:
+                        entry = datapoint[1][self.primary_key]
                     trash_icon = TrashButton((
                         self.table,
                         self.primary_key,
-                        datapoint[1][self.primary_key]
+                        entry
                     ), actions_frame)
                     trash_icon.grid(row=0, column=1, pady=5, padx=5, sticky="w")
 

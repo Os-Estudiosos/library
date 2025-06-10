@@ -45,12 +45,14 @@ class SearchSelect:
         self.value_column = value_column
         self.boxoption = None
         self.options = None
-        self.dataframe = pd.read_csv(f"gui/screens/csv/{self.table}.csv")
+
+        qtd = self.table.read()["total_registros"]
+        self.dataframe = self.table.read(qtd=qtd)["registros"]
 
         self.restart(**kwargs)
     
     def restart(self, **kwargs):
-        self.options = self.dataframe[self.exihibition_column]
+        self.options = self.dataframe[self.exihibition_column].tolist()
         self.boxoption = ctk.CTkOptionMenu(
             master=self.master,
             values=self.options,
@@ -60,10 +62,18 @@ class SearchSelect:
             text_color=Colors.GRAY.c_700
         )
     
+    def get(self):
+        exibido = self.boxoption.get()
+        resultado = self.dataframe[self.dataframe[self.exihibition_column] == exibido]
+        if resultado.empty:
+            return None
+        return resultado[self.value_column].iloc[0]
+    
     def insert(self, *args):
         index = args[0]
-        value = self.dataframe[self.dataframe[self.value_column]==index][self.exihibition_column].iloc[0]
+        value = self.dataframe[self.dataframe[self.value_column] == index][self.exihibition_column].iloc[0]
         self.boxoption.set(value)
     
     def grid(self, **kwargs):
         self.boxoption.grid(**kwargs)
+

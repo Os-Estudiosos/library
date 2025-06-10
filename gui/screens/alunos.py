@@ -10,12 +10,20 @@ from gui.screens.components.table import Table
 from gui.screens.components.input import Input, SearchSelect
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Students(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
+        
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -86,18 +94,9 @@ class Students(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        students = pd.read_csv("gui/screens/csv/students.csv")
+        pagination = TablesManager.alunoTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_students")
-
-        pagination = {
-            "registros": students.head(10),
-            "total_registros": 30,
-            "registros_por_pagina": 10,
-            "total_paginas": 3,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
         table.build(pagination)
 
 

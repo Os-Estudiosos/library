@@ -58,7 +58,7 @@ class AlunoTable:
                 Aluno.UltimoNomeAl,
                 Aluno.DataNascimentoAl,
                 Aluno.SenhaAl,
-                Aluno.IdTurma,
+                Aluno.IdTurma
                 {base_sql}
             """
             params = []

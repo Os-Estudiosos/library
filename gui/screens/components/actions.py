@@ -158,9 +158,15 @@ class TrashButton:
         buttons_container.grid(column=1, row=2, sticky="w", pady=(0, 15))
 
         def delete_btn_callback():
-            table.delete({
-                f"{primary_key}": primary_key_value
-            })
+            if isinstance(primary_key, tuple):
+                keys = {}
+                for i in range(len(primary_key)):
+                    keys[primary_key[i]] = primary_key_value[i]
+                table.delete(keys)
+            else:
+                table.delete({
+                    f"{primary_key}": primary_key_value
+                })
             overlay.destroy()
             RouteManager.go_to(RouteManager.active)
 

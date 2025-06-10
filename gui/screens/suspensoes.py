@@ -90,19 +90,23 @@ class Suspensions(Screen):
 
         pagination = TablesManager.suspensaoTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_classes", "see_class")
+        table = Table(self.app, "edit_suspensions", TablesManager.suspensaoTable, ("idsusp", "matriculaal"))
         table.build(pagination)
 
 
 class EditSuspension(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
+        self.current_matriculaal = None
+        self.current_idsusp = None
     
     def build(self, *args, **kwargs):
-        suspension = args[0]
+        self.current_idsusp = args[0]["idsusp"]
+        self.current_matriculaal = args[0]["matriculaal"]
+        suspension = TablesManager.suspensaoTable.read_one(
+            idsusp=self.current_idsusp,
+            matriculaal=self.current_matriculaal
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -167,7 +171,7 @@ class EditSuspension(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
@@ -183,14 +187,19 @@ class EditSuspension(Screen):
             ]
         )
         self.forms.build(self.send, suspension)
+    
+    def send(self):
+        values = self.forms.get_values()
+        TablesManager.suspensaoTable.update({
+            "idsusp": self.current_idsusp,
+            "matriculaal": self.current_matriculaal,
+        },values)
+        RouteManager.go_back()
 
 
 class CreateSuspension(Screen):
     def __init__(self, app):
         self.app = app
-
-    def send(self):
-        RouteManager.go_back()
     
     def build(self, *args, **kwargs):
         title_frame = ctk.CTkFrame(
@@ -256,7 +265,7 @@ class CreateSuspension(Screen):
                 "matriculaal": {
                     "label": "Aluno:",
                     "intype": "search",
-                    "table": "students",
+                    "table": TablesManager.alunoTable,
                     "exihibition_column": "primeironomeal",
                     "value_column": "matriculaal"
                 },
@@ -272,3 +281,14 @@ class CreateSuspension(Screen):
             ]
         )
         self.forms.build(self.send)
+    
+    def send(self):
+        values = self.forms.get_values()
+        new_values = values.copy()
+        del new_values["matriculaal"]
+        current_idsusp = TablesManager.suspensaoTable.read()["total_registros"]
+        TablesManager.suspensaoTable.create({
+            "idsusp": current_idsusp+1,
+            "matriculaal": values["matriculaal"],
+        },new_values)
+        RouteManager.go_back()
