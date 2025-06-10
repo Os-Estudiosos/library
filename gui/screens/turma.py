@@ -6,7 +6,7 @@ from gui.manager.routemanager import RouteManager
 import tkinter as tk
 
 from gui.screens.components.table import Table
-from gui.screens.components.input import Input
+from gui.screens.components.forms import Form
 
 
 class Classes(Screen):
@@ -151,6 +151,27 @@ class EditClass(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
+        self.forms = Form(
+            master=self.app,
+            form_dict={
+                "nometurma": {
+                    "label": "Nome da Turma:",
+                    "intype": "entry",
+                    "placeholder": "Ex: Redes de Computadores"
+                },
+            },
+            entry_dict={
+                "nometurma": tk.StringVar(),
+            },
+            layout=[
+                ["nometurma"],
+            ]
+        )
+        self.forms.build(self.send, library_class)
+    
+    def send(self):
+        pass
+
 
 class CreateClass(Screen):
     def __init__(self, app):
@@ -204,51 +225,23 @@ class CreateClass(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-
-        forms_frame = ctk.CTkFrame(
+        self.forms = Form(
             master=self.app,
-            fg_color="#ffffff"
+            form_dict={
+                "nometurma": {
+                    "label": "Nome da Turma:",
+                    "intype": "entry",
+                    "placeholder": "Ex: Redes de Computadores"
+                },
+            },
+            entry_dict={
+                "nometurma": tk.StringVar(),
+            },
+            layout=[
+                ["nometurma"],
+            ]
         )
-        forms_frame.grid(row=1, column=0, sticky="nswe", padx=10)
-
-
-        wrapper = ctk.CTkFrame(
-            forms_frame,
-            fg_color="transparent"
-        )
-        wrapper.rowconfigure(0, weight=1)
-        wrapper.rowconfigure(1, weight=1)
-
-        label = ctk.CTkLabel(
-            wrapper,
-            text="Nome da Turma",
-            text_color=Colors.GRAY.c_600
-        )
-        label.grid(row=0, column=0, sticky="w")
-
-        self.nometurma = Input(
-            master=wrapper,
-            name="nometurma",
-            placeholder_text="Insira o nome da Turma",
-            border_width=1,
-            width=300,
-        )
-        self.nometurma.grid(row=1, column=0, sticky="w")
-
-        wrapper.grid(row=0, column=0, padx=10, pady=10)
-
-        confirm_button = ctk.CTkButton(
-            forms_frame,
-            text="Confirmar",
-            font=("Arial", 14, "bold"),
-            fg_color=Colors.INDIGO.c_600,
-            hover_color=Colors.INDIGO.c_700,
-            command=self.send,
-            text_color="#fff",
-            width=100,
-            corner_radius=10
-        )
-        confirm_button.grid(row=1, column=0, ipady=5, sticky="w", padx=10, pady=(0, 10))
+        self.forms.build(self.send)
     
     def send(self):
         pass

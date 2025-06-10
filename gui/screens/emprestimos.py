@@ -6,7 +6,7 @@ import tkinter as tk
 
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
-from gui.screens.components.input import Input
+from gui.screens.components.forms import Form
 
 
 class Loans(Screen):
@@ -54,7 +54,7 @@ class Loans(Screen):
             font=("Arial", 14, "bold"),
             fg_color=Colors.INDIGO.c_600,
             hover_color=Colors.INDIGO.c_700,
-            command=lambda: RouteManager.go_to("create_category"),
+            command=lambda: RouteManager.go_to("create_loan"),
             width=100,
             text_color="#fff",
             corner_radius=10
@@ -98,54 +98,6 @@ class Loans(Screen):
 class EditLoan(Screen):
     def __init__(self, app):
         self.app = app
-
-        self.form_dict = {
-            "datainicioemp": {
-                "label": "Data de Início:",
-                "intype": "entry",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "datafimemp": {
-                "label": "Data de Fim:",
-                "intype": "entry",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "baixaemp": {
-                "label": "Baixa no Empréstimo:",
-                "intype": "toggle",
-            },
-            "matriculaal": {
-                "label": "Aluno:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "isbnliv": {
-                "label": "ISBN do Livro:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "cpfatt": {
-                "label": "Atendente:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-        }
-
-        self.student_dict = {
-            "datainicioemp": tk.StringVar(),
-            "datafimemp": tk.StringVar(),
-            "baixaemp": tk.StringVar(),
-            "matriculaal": tk.StringVar(),
-            "isbnliv": tk.StringVar(),
-            "cpfatt": tk.StringVar(),
-        }
-
-        self.layout = [
-            ["datainicioemp", "datafimemp"],
-            ["baixaemp", None]
-        ]
-
-        self.inputs=[]
 
     def send(self):
         RouteManager.go_back()
@@ -200,109 +152,65 @@ class EditLoan(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        forms_frame = ctk.CTkFrame(
+        self.forms = Form(
             master=self.app,
-            fg_color="#ffffff"
+            form_dict={
+                "datainicioemp": {
+                    "label": "Data de Início:",
+                    "intype": "entry",
+                    "placeholder": "Ex: 30-03-2018"
+                },
+                "datafimemp": {
+                    "label": "Data de Fim:",
+                    "intype": "entry",
+                    "placeholder": "Ex: 30-03-2018"
+                },
+                "baixaemp": {
+                    "label": "Baixa no Empréstimo:",
+                    "intype": "toggle",
+                },
+                "matriculaal": {
+                    "label": "Aluno:",
+                    "intype": "search",
+                    "table": "students",
+                    "exihibition_column": "primeironomeal",
+                    "value_column": "matriculaal"
+                },
+                "isbnliv": {
+                    "label": "Livro:",
+                    "intype": "search",
+                    "table": "books",
+                    "exihibition_column": "nomeliv",
+                    "value_column": "isbnliv"
+                },
+                "cpfatt": {
+                    "label": "Atendente:",
+                    "intype": "search",
+                    "table": "atts",
+                    "exihibition_column": "primeironomeatt",
+                    "value_column": "cpfatt"
+                },
+            },
+            entry_dict={
+                "datainicioemp": tk.StringVar(),
+                "datafimemp": tk.StringVar(),
+                "baixaemp": tk.StringVar(),
+                "matriculaal": tk.StringVar(),
+                "isbnliv": tk.StringVar(),
+                "cpfatt": tk.StringVar(),
+            },
+            layout=[
+                ["datainicioemp", "datafimemp"],
+                ["baixaemp", "matriculaal"],
+                ["isbnliv", "cpfatt"]
+            ]
         )
-        forms_frame.grid(row=1, column=0, sticky="nswe", padx=10)
-
-        for i, line in enumerate(self.layout):
-            for j, key in enumerate(line):
-                if key is not None and self.form_dict[key]["intype"] == "entry":
-                    forms_frame.rowconfigure(i, weight=1)
-                    forms_frame.columnconfigure(j, weight=1)
-
-                    wrapper = ctk.CTkFrame(
-                        forms_frame,
-                        fg_color="transparent"
-                    )
-                    wrapper.rowconfigure(0, weight=1)
-                    wrapper.rowconfigure(1, weight=1)
-
-                    label = ctk.CTkLabel(
-                        wrapper,
-                        text=self.form_dict[key]["label"],
-                        text_color=Colors.GRAY.c_600
-                    )
-                    label.grid(row=0, column=0, sticky="w")
-
-                    input = Input(
-                        master=wrapper,
-                        name=key,
-                        placeholder_text=self.form_dict[key]["placeholder"],
-                        border_width=1,
-                        width=450,
-                    )
-                    input.grid(row=1, column=0, sticky="ew")
-                    input.insert(0, loan[key])
-
-                    wrapper.grid(row=i, column=j, padx=10, pady=(10, 0), sticky="ew")
-
-        confirm_button = ctk.CTkButton(
-            forms_frame,
-            text="Confirmar",
-            font=("Arial", 14, "bold"),
-            fg_color=Colors.INDIGO.c_600,
-            hover_color=Colors.INDIGO.c_700,
-            command=self.send,
-            text_color="#fff",
-            width=100,
-            corner_radius=10
-        )
-        confirm_button.grid(row=i+1, column=0, ipady=5, sticky="w", padx=10, pady=(10, 10))
+        self.forms.build(self.send, loan)
 
 
 class CreateLoan(Screen):
     def __init__(self, app):
         self.app = app
-
-        self.form_dict = {
-            "datainicioemp": {
-                "label": "Data de Início:",
-                "intype": "entry",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "datafimemp": {
-                "label": "Data de Fim:",
-                "intype": "entry",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "baixaemp": {
-                "label": "Baixa no Empréstimo:",
-                "intype": "toggle",
-            },
-            "matriculaal": {
-                "label": "Aluno:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "isbnliv": {
-                "label": "ISBN do Livro:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-            "cpfatt": {
-                "label": "Atendente:",
-                "intype": "options",
-                "placeholder": "Ex: 30-03-2018"
-            },
-        }
-
-        self.student_dict = {
-            "datainicioemp": tk.StringVar(),
-            "datafimemp": tk.StringVar(),
-            "baixaemp": tk.StringVar(),
-            "matriculaal": tk.StringVar(),
-            "isbnliv": tk.StringVar(),
-            "cpfatt": tk.StringVar(),
-        }
-
-        self.layout = [
-            ["datainicioemp", "datafimemp"],
-            ["baixaemp", None]
-        ]
-
-        self.inputs=[]
 
     def send(self):
         RouteManager.go_back()
@@ -362,46 +270,57 @@ class CreateLoan(Screen):
         )
         forms_frame.grid(row=1, column=0, sticky="nswe", padx=10)
 
-        for i, line in enumerate(self.layout):
-            for j, key in enumerate(line):
-                if key is not None and self.form_dict[key]["intype"] == "entry":
-                    forms_frame.rowconfigure(i, weight=1)
-                    forms_frame.columnconfigure(j, weight=1)
-
-                    wrapper = ctk.CTkFrame(
-                        forms_frame,
-                        fg_color="transparent"
-                    )
-                    wrapper.rowconfigure(0, weight=1)
-                    wrapper.rowconfigure(1, weight=1)
-
-                    label = ctk.CTkLabel(
-                        wrapper,
-                        text=self.form_dict[key]["label"],
-                        text_color=Colors.GRAY.c_600
-                    )
-                    label.grid(row=0, column=0, sticky="w")
-
-                    input = Input(
-                        master=wrapper,
-                        name=key,
-                        placeholder_text=self.form_dict[key]["placeholder"],
-                        border_width=1,
-                        width=450,
-                    )
-                    input.grid(row=1, column=0, sticky="ew")
-
-                    wrapper.grid(row=i, column=j, padx=10, pady=(10, 0), sticky="ew")
-
-        confirm_button = ctk.CTkButton(
-            forms_frame,
-            text="Inserir",
-            font=("Arial", 14, "bold"),
-            fg_color=Colors.INDIGO.c_600,
-            hover_color=Colors.INDIGO.c_700,
-            command=self.send,
-            text_color="#fff",
-            width=100,
-            corner_radius=10
+        self.forms = Form(
+            master=self.app,
+            form_dict={
+                "datainicioemp": {
+                    "label": "Data de Início:",
+                    "intype": "entry",
+                    "placeholder": "Ex: 30-03-2018"
+                },
+                "datafimemp": {
+                    "label": "Data de Fim:",
+                    "intype": "entry",
+                    "placeholder": "Ex: 30-03-2018"
+                },
+                "baixaemp": {
+                    "label": "Baixa no Empréstimo:",
+                    "intype": "toggle",
+                },
+                "matriculaal": {
+                    "label": "Aluno:",
+                    "intype": "search",
+                    "table": "students",
+                    "exihibition_column": "primeironomeal",
+                    "value_column": "matriculaal"
+                },
+                "isbnliv": {
+                    "label": "Livro:",
+                    "intype": "search",
+                    "table": "books",
+                    "exihibition_column": "nomeliv",
+                    "value_column": "isbnliv"
+                },
+                "cpfatt": {
+                    "label": "Atendente:",
+                    "intype": "search",
+                    "table": "atts",
+                    "exihibition_column": "primeironomeatt",
+                    "value_column": "cpfatt"
+                },
+            },
+            entry_dict={
+                "datainicioemp": tk.StringVar(),
+                "datafimemp": tk.StringVar(),
+                "baixaemp": tk.StringVar(),
+                "matriculaal": tk.StringVar(),
+                "isbnliv": tk.StringVar(),
+                "cpfatt": tk.StringVar(),
+            },
+            layout=[
+                ["datainicioemp", "datafimemp"],
+                ["baixaemp", "matriculaal"],
+                ["isbnliv", "cpfatt"]
+            ]
         )
-        confirm_button.grid(row=i+1, column=0, ipady=5, sticky="w", padx=10, pady=(10, 10))
+        self.forms.build(self.send)
