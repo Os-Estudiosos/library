@@ -79,7 +79,11 @@ class LivroTable:
                 "registros": pd.DataFrame(registros, columns=[
                     "ISBN Livro", "Nome Livro", "Editora Livro", "Edição Livro",
                     "Ano Lançamento", "Grupo"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["isbnliv", "nomeliv", "editoraliv", "edicaoliv", "anolancamentoliv", "idgru"],
+                )
             })
             return resultado
         except Exception as e:

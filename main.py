@@ -14,7 +14,7 @@ from gui.screens.suspensoes import Suspensions, EditSuspension, CreateSuspension
 from gui.screens.turma import Classes, EditClass, CreateClass, SeeClass
 
 # Configurations
-from config.database import *
+from gui.manager.tablesmanager import *
 
 if __name__ == "__main__":
     app = Application(fg_color="#ffffff")
@@ -61,5 +61,20 @@ if __name__ == "__main__":
     }
     RouteManager.app = app
 
+    # connection = Connection(
+    #     db_name=DB_NAME,
+    #     host=DB_HOST,
+    #     path=DB_PATH,
+    #     password=DB_PASSWORD,
+    #     user=DB_OWNER
+    # )
+
+    # TablesManager.atendenteTable = AtendenteTable(connection)
+    # TablesManager.alunoTable = AlunoTable(connection)
+    # TablesManager.livroTable = LivroTable(connection)
+    # TablesManager.suspensaoTable = SuspensaoTable(connection)
+    # TablesManager.turmaTable = TurmaTable(connection)
+
     app.initialize()
     app.mainloop()
+    connection.close()

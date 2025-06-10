@@ -74,7 +74,11 @@ class GrupoTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "ID Grupo", "Nome Grupo"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["idgru", "nomegru"],
+                )
             })
             return resultado
         except Exception as e:

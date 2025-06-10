@@ -82,7 +82,11 @@ class EmprestimoTable:
                 "registros": pd.DataFrame(registros, columns=[
                     "ID Emprestimo", "Data início", "Data fim", "Baixa",
                     "Nome Aluno", "Nome Atendente", "Nome Livro"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["idemp", "datainicioemp", "datafimemp", "baixaemp", "isbnliv"],
+                )
             })
             return resultado
         except Exception as e:

@@ -77,7 +77,11 @@ class ReservaTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "Id Reserva", "Data Reserva", "Nome Aluno", "Nome Livro"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["idres", "datares", "matriculaal", "isbnliv"],
+                )
             })
             return resultado
         except Exception as e:

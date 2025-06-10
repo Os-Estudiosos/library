@@ -3,7 +3,6 @@ from database.tables import Table
 import pandas as pd
 
 class AlunoTable:
-
     def __init__(self, connection: Connection):
         self.conn = connection
         self.name = "Aluno"

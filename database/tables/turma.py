@@ -74,7 +74,11 @@ class TurmaTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "ID Turma", "Nome Turma"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["idturma", "nometurma"],
+                )
             })
             return resultado
         except Exception as e:
@@ -82,6 +86,21 @@ class TurmaTable:
             if cursor:
                 cursor.close()
             return {}
+    
+    def read_one(self, idturma: int):
+        cursor = None
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(f"SELECT * FROM {self.name} WHERE idturma='%s';", (idturma,))
+
+            registro = cursor.fetchall()
+            cursor.close()
+            return pd.Series(*registro, index=["idturma","nometurma"])
+        except Exception as e:
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
+            return None
 
     def update(self, primary_key: dict, colums: dict):
         try:

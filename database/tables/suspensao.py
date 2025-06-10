@@ -77,7 +77,11 @@ class SuspensaoTable:
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
                     "Id Suspensão", "Data Início", "Data Fim", "Nome Aluno"
-                ])
+                ]),
+                "bruto": pd.DataFrame(
+                    registros,
+                    columns=["idsusp", "datainiciosusp", "datafimsusp", "matriculaal"],
+                )
             })
             return resultado
         except Exception as e:

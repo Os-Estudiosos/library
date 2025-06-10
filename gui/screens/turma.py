@@ -8,12 +8,21 @@ import tkinter as tk
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Classes(Screen):
     def __init__(self, app):
         self.app = app
 
+        self.items_per_page=10
+
     def build(self, *args, **kwargs):
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
+
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -83,15 +92,7 @@ class Classes(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        classes = pd.read_csv("gui/screens/csv/classes.csv")
-
-        pagination = {
-            "registros": classes.head(6),
-            "total_registros": 12,
-            "registros_por_pagina": 6,
-            "total_paginas": 2,
-            "pagina_atual": 1
-        }
+        pagination = TablesManager.turmaTable.read(qtd=self.items_per_page, pagina=page)
 
         table = Table(self.app, "edit_classes", "see_class")
         table.build(pagination)
@@ -102,7 +103,10 @@ class EditClass(Screen):
         self.app = app
     
     def build(self, *args, **kwargs):
-        library_class: pd.Series = args[0]
+        entry_library_class: pd.Series = args[0]
+        library_class = TablesManager.turmaTable.read_one(
+            idturma=entry_library_class["ID Turma"],
+        )
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -124,7 +128,7 @@ class EditClass(Screen):
 
         description = ctk.CTkLabel(
             title_frame,
-            text=f"Você está editando a turma de {library_class.nometurma}",
+            text=f"Você está editando a turma de {library_class["nometurma"]}",
             font=("Arial", 15, "bold"),
             text_color=Colors.SLATE.c_900,
             justify="left"
