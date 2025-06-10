@@ -1,151 +1,130 @@
 from database import Connection
+import pandas as pd
+from database.tables import Table
 
 class AlFavoritaLivTable:
-    
+
     def __init__(self, connection: Connection):
-        if not connection or connection.closed:
-            raise ValueError("Conexão inválida ou fechada.")
-        self.conn = connection
-        self.values = "(ISBNLiv, MatriculaAl)"
-        self.name = "AlFavoritaLiv"
-        self.valid_columns = {"ISBNLiv", "MatriculaAl"}
+                self.conn = connection
+                self.name = "AlFavoritaLiv"
 
-    def _check_isbn_exists(self, isbn_liv):
-        """Verifica se o ISBN existe na tabela Livro."""
-        with self.conn.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM Livro WHERE ISBNLiv = %s;", (isbn_liv,))
-            return cursor.fetchone() is not None
-
-    def _check_matricula_exists(self, matricula_al):
-        """Verifica se a MatriculaAl existe na tabela Aluno."""
-        with self.conn.cursor() as cursor:
-            cursor.execute("SELECT 1 FROM Aluno WHERE MatriculaAl = %s;", (matricula_al,))
-            return cursor.fetchone() is not None
-
-    def create(self, isbn_liv, matricula_al):
-        if not isinstance(isbn_liv, str) or len(isbn_liv) != 13:
-            raise ValueError("ISBN deve ser uma string de 13 caracteres.")
-        if not self._check_isbn_exists(isbn_liv):
-            raise ValueError(f"ISBN {isbn_liv} não encontrado na tabela Livro.")
-        if not self._check_matricula_exists(matricula_al):
-            raise ValueError(f"Matrícula {matricula_al} não encontrada na tabela Aluno.")
+    def create(self, primary_key: dict, colums: dict):
         try:
+            all_columns = list(primary_key.keys()) + list(colums.keys())
+            all_values = list(primary_key.values()) + list(colums.values())
+            col_names = ', '.join(all_columns)
+            placeholders = ', '.join(['%s'] * len(all_columns))
+            conflict_key = ', '.join(primary_key.keys())
+            update_set = ', '.join([f"{col} = EXCLUDED.{col}" for col in colums.keys()])
             sql = f"""
-            INSERT INTO {self.name} {self.values} VALUES (%s, %s)
-            ON CONFLICT (ISBNLiv, MatriculaAl) DO NOTHING;
+            INSERT INTO {self.name} ({col_names})
+            VALUES ({placeholders})
+            ON CONFLICT ({conflict_key}) DO UPDATE SET
+            {update_set};
             """
-            with self.conn.cursor() as cursor:
-                cursor.execute(sql, (isbn_liv, matricula_al))
-                if cursor.rowcount > 0:
-                    self.conn.commit()
-                    print(f"{self.name} inserida com sucesso.")
-                else:
-                    self.conn.rollback()
-                    print(f"{self.name} já existe com ISBNLiv {isbn_liv} e MatriculaAl {matricula_al}.")
+            cursor = self.conn.cursor()
+            cursor.execute(sql, all_values)
+            self.conn.commit()
+            cursor.close()
+            print(f"{self.name} inserida ou atualizada com sucesso.")
         except Exception as e:
             self.conn.rollback()
-            print(f"Erro ao inserir ({isbn_liv}, {matricula_al}): {e}")
+            print("Erro ao inserir:", e)
 
-    def read(self, qtd=15, pagina=1, filter=None):
-        dict = {}
+    def read(self, filter: dict = None, qtd=15, pagina=1):
+        resultado = {}
+        cursor = None
         try:
-            with self.conn.cursor() as cursor:
-                cursor.execute(f"SELECT COUNT(*) FROM {self.name};")
-                total_registros = cursor.fetchone()[0]
-                
-                if qtd <= 0:
-                    print("Quantidade de registros por página deve ser maior que zero.")
-                    return {}
-                if qtd > total_registros:
-                    qtd = total_registros
-                
-                registros_por_pagina = qtd
-                total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
-                dict["total_registros"] = total_registros
-                dict["registros_por_pagina"] = registros_por_pagina
-                dict["total_paginas"] = total_paginas
-                dict["pagina_atual"] = pagina
-                
-                offset = (pagina - 1) * qtd
-                sql = f"SELECT * FROM {self.name}"
-                params = []
-                if filter:
-                    print(f"Filtro recebido: {filter}")  # Log para depuração
-                    invalid_columns = [k for k in filter.keys() if k not in self.valid_columns]
-                    if invalid_columns:
-                        raise ValueError(f"Filtro contém colunas inválidas: {invalid_columns}")
-                    filter_conditions = " AND ".join([f"{k} = %s" for k in filter.keys()])
-                    sql += f" WHERE {filter_conditions}"
-                    params.extend(filter.values())
-                sql += f" ORDER BY ISBNLiv, MatriculaAl LIMIT %s OFFSET %s"
-                params.extend([qtd, offset])
-                
-                cursor.execute(sql, tuple(params))
-                dict["registros"] = cursor.fetchall()
-                print(f"Registros retornados: {dict['registros']}")  # Log para depuração
-                return dict
-        except ValueError as e:
-            print(f"Erro ao ler registros: {e}")
-            raise  # Propaga ValueError para filtros inválidos
+            cursor = self.conn.cursor()
+            base_sql = f"""
+                FROM {self.name}
+            """
+            if filter:
+                where_clause = " AND ".join([f"{k} = %s" for k in filter.keys()])
+                count_sql = f"SELECT COUNT(*) {base_sql} WHERE {where_clause};"
+                cursor.execute(count_sql, list(filter.values()))
+            else:
+                count_sql = f"SELECT COUNT(*) {base_sql};"
+                cursor.execute(count_sql)
+            total_registros = cursor.fetchone()[0]
+            if total_registros == 0:
+                print("Nenhum registro encontrado.")
+                return {}
+            registros_por_pagina = min(qtd, total_registros)
+            total_paginas = (total_registros + registros_por_pagina - 1) // registros_por_pagina
+            offset = (pagina - 1) * registros_por_pagina
+            sql = f"""
+                SELECT AlFavoritaLiv.ISBNLiv,
+                AlFavoritaLiv.MatriculaAl
+                {base_sql}
+            """
+            params = []
+            if filter:
+                sql += f" WHERE {where_clause}"
+                params.extend(filter.values())
+            sql += " ORDER BY AlFavoritaLiv.MatriculaAl LIMIT %s OFFSET %s"
+            params.extend([registros_por_pagina, offset])
+            cursor.execute(sql, tuple(params))
+            registros = cursor.fetchall()
+            cursor.close()
+            resultado.update({
+                "total_registros": total_registros,
+                "registros_por_pagina": registros_por_pagina,
+                "total_paginas": total_paginas,
+                "pagina_atual": pagina,
+                "registros": pd.DataFrame(registros, columns=[
+                    "ID Turma", "Nome Turma"
+                ])
+            })
+            return resultado
         except Exception as e:
-            print(f"Erro ao ler registros: {e}")
+            print("Erro ao ler:", e)
+            if cursor:
+                cursor.close()
             return {}
 
-    def update(self, isbn_liv_old, matricula_al_old, isbn_liv_new, matricula_al_new):
-        if not isinstance(isbn_liv_old, str) or len(isbn_liv_old) != 13:
-            raise ValueError("ISBN antigo deve ser uma string de 13 caracteres.")
-        if not isinstance(isbn_liv_new, str) or len(isbn_liv_new) != 13:
-            raise ValueError("ISBN novo deve ser uma string de 13 caracteres.")
-        if not self._check_isbn_exists(isbn_liv_new):
-            raise ValueError(f"ISBN novo {isbn_liv_new} não encontrado na tabela Livro.")
-        if not self._check_matricula_exists(matricula_al_new):
-            raise ValueError(f"Matrícula nova {matricula_al_new} não encontrada na tabela Aluno.")
+    def update(self, primary_key: dict, colums: dict):
         try:
-            with self.conn.cursor() as cursor:
-                # Verifica se o registro antigo existe
-                sql_check = f"SELECT 1 FROM {self.name} WHERE ISBNLiv = %s AND MatriculaAl = %s;"
-                cursor.execute(sql_check, (isbn_liv_old, matricula_al_old))
-                if cursor.rowcount == 0:
-                    print(f"{self.name} com ISBNLiv {isbn_liv_old} e MatriculaAl {matricula_al_old} não encontrada.")
-                    return
-                
-                # Verifica se a nova combinação já existe
-                sql_check_new = f"SELECT 1 FROM {self.name} WHERE ISBNLiv = %s AND MatriculaAl = %s;"
-                cursor.execute(sql_check_new, (isbn_liv_new, matricula_al_new))
-                if cursor.fetchone():
-                    self.conn.rollback()
-                    print(f"{self.name} com ISBNLiv {isbn_liv_new} e MatriculaAl {matricula_al_new} já existe.")
-                    return
-                
-                # Exclui a relação antiga
-                sql_delete = f"DELETE FROM {self.name} WHERE ISBNLiv = %s AND MatriculaAl = %s;"
-                cursor.execute(sql_delete, (isbn_liv_old, matricula_al_old))
-                
-                # Insere a nova relação
-                sql_insert = f"INSERT INTO {self.name} {self.values} VALUES (%s, %s);"
-                cursor.execute(sql_insert, (isbn_liv_new, matricula_al_new))
-                
-                self.conn.commit()
-                print(f"{self.name} atualizada com sucesso: ({isbn_liv_old}, {matricula_al_old}) para ({isbn_liv_new}, {matricula_al_new}).")
+            if not primary_key or not colums:
+                print("Chave primária e colunas a atualizar não podem estar vazias.")
+                return
+            set_clause = ', '.join([f"{col} = %s" for col in colums.keys()])
+            where_clause = ' AND '.join([f"{pk} = %s" for pk in primary_key.keys()])
+            values = list(colums.values()) + list(primary_key.values())
+            sql = f"""
+            UPDATE {self.name}
+            SET {set_clause}
+            WHERE {where_clause};
+            """
+            cursor = self.conn.cursor()
+            cursor.execute(sql, values)
+            self.conn.commit()
+            cursor.close()
+            print(f"{self.name} atualizada com sucesso.")
         except Exception as e:
             self.conn.rollback()
-            print(f"Erro ao atualizar ({isbn_liv_old}, {matricula_al_old}) para ({isbn_liv_new}, {matricula_al_new}): {e}")
+            print("Erro ao atualizar:", e)
 
-    def delete(self, isbn_liv, matricula_al):
-        if not isinstance(isbn_liv, str) or len(isbn_liv) != 13:
-            raise ValueError("ISBN deve ser uma string de 13 caracteres.")
+    def delete(self, primary_key: dict):
         try:
-            with self.conn.cursor() as cursor:
-                sql = f"DELETE FROM {self.name} WHERE ISBNLiv = %s AND MatriculaAl = %s;"
-                cursor.execute(sql, (isbn_liv, matricula_al))
-                if cursor.rowcount == 0:
-                    print(f"{self.name} com ISBNLiv {isbn_liv} e MatriculaAl {matricula_al} não encontrada.")
-                    return
-                self.conn.commit()
-                print(f"{self.name} excluída com sucesso.")
+            if not primary_key:
+                print("Chave primária não pode estar vazia.")
+                return
+            where_clause = ' AND '.join([f"{pk} = %s" for pk in primary_key.keys()])
+            values = list(primary_key.values())
+            sql = f"DELETE FROM {self.name} WHERE {where_clause};"
+            cursor = self.conn.cursor()
+            cursor.execute(sql, values)
+            if cursor.rowcount == 0:
+                print(f"{self.name} com os critérios {primary_key} não encontrada.")
+                cursor.close()
+                return
+            self.conn.commit()
+            cursor.close()
+            print(f"{self.name} excluída com sucesso.")
         except Exception as e:
             self.conn.rollback()
-            print(f"Erro ao excluir ({isbn_liv}, {matricula_al}): {e}")
+            print("Erro ao excluir:", e)
 
     def close(self):
         if self.conn:
@@ -153,6 +132,6 @@ class AlFavoritaLivTable:
                 self.conn.close()
                 print("Conexão fechada com sucesso.")
             except Exception as e:
-                print(f"Erro ao fechar a conexão: {e}")
+                print("Erro ao fechar a conexão:", e)
         else:
             print("Nenhuma conexão para fechar.")
