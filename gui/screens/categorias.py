@@ -90,7 +90,7 @@ class Categories(Screen):
 
         pagination = TablesManager.categoriaTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_categories", TablesManager.categoriaTable, "idcat", "see_categories")
+        table = Table(self.app, "edit_categories", TablesManager.categoriaTable, "idcat")
         table.build(pagination)
 
 
@@ -259,74 +259,3 @@ class CreateCategory(Screen):
             "idcat": current_idres+1,
         },values)
         RouteManager.go_back()
-
-
-class SeeCategory(Screen):
-    def __init__(self, app):
-        self.app = app
-    
-    def build(self, *args, **kwargs):
-        category = args[0]
-
-        title_frame = ctk.CTkFrame(
-            self.app,
-            fg_color="transparent"
-        )
-        title_frame.rowconfigure(0, weight=1)
-        title_frame.rowconfigure(1, weight=1)
-        title_frame.columnconfigure(0, weight=1)
-        title_frame.columnconfigure(1, weight=1)
-
-        title = ctk.CTkLabel(
-            title_frame,
-            text=f"{category.nomecat}",
-            font=("Arial", 20, "bold"),
-            text_color=Colors.SLATE.c_900,
-            justify="left"
-        )
-        title.grid(column=0, row=0, sticky="w")
-
-        description = ctk.CTkLabel(
-            title_frame,
-            text=f"Veja os livros na categoria {category.nomecat}",
-            font=("Arial", 15, "bold"),
-            text_color=Colors.SLATE.c_900,
-            justify="left"
-        )
-        description.grid(column=0, row=1, sticky="w")
-
-        cancel_button = ctk.CTkButton(
-            title_frame,
-            command=lambda: RouteManager.go_back(),
-            fg_color="#ffffff",
-            hover_color=Colors.GRAY.c_100,
-            text_color=Colors.GRAY.c_800,
-            border_color=Colors.GRAY.c_300,
-            border_width=1,
-            text="Voltar",
-            font=("Arial", 13, "bold"),
-            width=100,
-            corner_radius=10
-        )
-        cancel_button.grid(column=1, row=0, ipady=5, rowspan=2, sticky="e")
-
-        title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
-
-        self.app.grid_rowconfigure(1, weight=1)
-        self.app.grid_columnconfigure(0, weight=1)
-
-        association_table = pd.read_csv("gui/screens/csv/livpertencecat.csv")
-        association_table = association_table[association_table["idcat"] == category.idcat]
-        books = pd.read_csv("gui/screens/csv/books.csv")
-        books = books[books["isbnliv"].isin(association_table["isbnliv"])]
-        
-        pagination = {
-            "registros": books,
-            "total_registros": len(books),
-            "registros_por_pagina": len(books),
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
-
-        table = Table(self.app, "edit_books")
-        table.build(pagination)

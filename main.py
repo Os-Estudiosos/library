@@ -6,7 +6,7 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.alunos import Students, EditStudent, CreateStudent
 from gui.screens.livros import Books, EditBook, CreateBook
 from gui.screens.atendentes import Secretaries, EditSecretary, CreateSecretary
-from gui.screens.categorias import Categories, EditCategory, CreateCategory, SeeCategory
+from gui.screens.categorias import Categories, EditCategory, CreateCategory
 from gui.screens.emprestimos import Loans, EditLoan, CreateLoan
 from gui.screens.grupos import Groups, EditGroup, CreateGroup, SeeGroup
 from gui.screens.reservas import Reserves, EditReserve, CreateReserve
@@ -35,7 +35,6 @@ if __name__ == "__main__":
         "categories": Categories(app.layout.frame),
         "edit_categories": EditCategory(app.layout.frame),
         "create_category": CreateCategory(app.layout.frame),
-        "see_category": SeeCategory(app.layout.frame),
 
         "loans": Loans(app.layout.frame),
         "edit_loans": EditLoan(app.layout.frame),

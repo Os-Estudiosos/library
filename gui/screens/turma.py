@@ -265,14 +265,10 @@ class CreateClass(Screen):
 class SeeClass(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         actual_class = args[0]
-
-        if len(args) >= 2 and args[1] is not None:
-            page = args[1]
-        else:
-            page = 1
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -321,13 +317,14 @@ class SeeClass(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        pagination = TablesManager.alunoTable.read(
-            {
-                "idturma": actual_class.idturma
-            },
-            10,
-            page
-        )
+        if len(args) >= 2 and args[1] is not None:
+            page = args[1]
+        else:
+            page = 1
 
-        table = Table(self.app, "edit_students")
+        pagination = TablesManager.alunoTable.read(filter={
+            "idturma": int(actual_class.idturma)
+        }, qtd=self.items_per_page, pagina=page)
+
+        table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
         table.build(pagination)

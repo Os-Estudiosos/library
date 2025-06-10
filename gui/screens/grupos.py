@@ -263,6 +263,7 @@ class CreateGroup(Screen):
 class SeeGroup(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page = 10
 
     def build(self, *args, **kwargs):
         group = args[0]
@@ -314,18 +315,14 @@ class SeeGroup(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        books = pd.read_csv("gui/screens/csv/books.csv")
+        if len(args) >= 2 and args[1] is not None:
+            page = args[1]
+        else:
+            page = 1
 
-        books = books[books["idgru"]==group["idgru"]]
+        pagination = TablesManager.livroTable.read(filter={
+            "idgru": int(group.idgru)
+        }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_books")
-
-        pagination = {
-            "registros": books,
-            "total_registros": 10,
-            "registros_por_pagina": 10,
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_book", TablesManager.livroTable, "isbnliv")
         table.build(pagination)
