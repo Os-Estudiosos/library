@@ -7,7 +7,7 @@ class TestAtendenteTable(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Inicializa a conexão com o banco de dados
-        cls.connection = Connection("livraria", "livraria", "thalis", "10.61.49.160", "thalis").initialize()
+        cls.connection = Connection("livraria", "livraria", "joao.pedro", "10.61.49.160", "joao.pedro").initialize()
         if cls.connection is None:
             raise RuntimeError("Falha ao inicializar a conexão com o banco de dados. Verifique as credenciais, host ou esquema.")
         if cls.connection.closed:
