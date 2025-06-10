@@ -73,7 +73,7 @@ class AlFavoritaLivTable:
                 "total_paginas": total_paginas,
                 "pagina_atual": pagina,
                 "registros": pd.DataFrame(registros, columns=[
-                    "ID Turma", "Nome Turma"
+                    "ISBN Livro", "Matrícula Aluno"
                 ])
             })
             return resultado
