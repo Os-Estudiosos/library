@@ -8,7 +8,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 
 from gui.screens.components.table import Table
-from gui.screens.components.input import Input, SearchSelect
+from gui.screens.components.empty import EmptyFrame
 from gui.screens.components.forms import Form
 
 from gui.manager.tablesmanager import TablesManager
@@ -97,8 +97,12 @@ class Students(Screen):
 
         pagination = TablesManager.alunoTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditStudent(Screen):

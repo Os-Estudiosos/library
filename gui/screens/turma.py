@@ -7,6 +7,7 @@ import tkinter as tk
 
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -94,8 +95,12 @@ class Classes(Screen):
 
         pagination = TablesManager.turmaTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_classes", TablesManager.turmaTable, "idturma", "see_class")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_classes", TablesManager.turmaTable, "idturma", "see_class")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditClass(Screen):
@@ -321,10 +326,14 @@ class SeeClass(Screen):
             page = kwargs["page"]
         else:
             page = 1
-
+        
         pagination = TablesManager.alunoTable.read(filter={
             "idturma": int(actual_class.idturma)
         }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_students", TablesManager.alunoTable, "matriculaal")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()

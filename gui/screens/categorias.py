@@ -7,6 +7,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -90,8 +91,12 @@ class Categories(Screen):
 
         pagination = TablesManager.categoriaTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_categories", TablesManager.categoriaTable, "idcat", "see_category")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_categories", TablesManager.categoriaTable, "idcat", "see_category")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditCategory(Screen):
@@ -325,5 +330,9 @@ class SeeCategory(Screen):
             "idcat": int(category.idcat)
         }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_books", TablesManager.lipertencecatTable, ("isbnliv", "idcat"))
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_books", TablesManager.lipertencecatTable, ("isbnliv", "idcat"))
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()

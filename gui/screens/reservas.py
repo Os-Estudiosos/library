@@ -7,6 +7,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -89,9 +90,13 @@ class Reserves(Screen):
             page = 1
 
         pagination = TablesManager.reservaTable.read(qtd=self.items_per_page, pagina=page)
-
-        table = Table(self.app, "edit_reserves", TablesManager.reservaTable, ("idres", "matriculaal"))
-        table.build(pagination)
+        
+        if pagination:
+            table = Table(self.app, "edit_reserves", TablesManager.reservaTable, ("idres", "matriculaal"))
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
 
 
 class EditReserve(Screen):

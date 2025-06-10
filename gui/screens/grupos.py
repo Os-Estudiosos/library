@@ -7,6 +7,7 @@ import tkinter as tk
 from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
+from gui.screens.components.empty import EmptyFrame
 
 from gui.manager.tablesmanager import TablesManager
 
@@ -324,5 +325,9 @@ class SeeGroup(Screen):
             "idgru": int(group.idgru)
         }, qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
-        table.build(pagination)
+        if pagination:
+            table = Table(self.app, "edit_books", TablesManager.livroTable, "isbnliv")
+            table.build(pagination)
+        else:
+            empty_frame = EmptyFrame(self.app)
+            empty_frame.build()
