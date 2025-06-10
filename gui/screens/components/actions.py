@@ -85,7 +85,7 @@ class TrashButton:
         self.__button = ctk.CTkButton(
             self.master,
             image=self._image,
-            command=lambda: self.delete_entry(arguments[0], arguments[1]),
+            command=lambda: self.delete_entry(arguments[0], arguments[1], arguments[2]),
             text="",
             width=25,
             height=25,
@@ -96,7 +96,7 @@ class TrashButton:
     def grid(self, **kwargs):
         self.__button.grid(**kwargs)
     
-    def delete_entry(self, table, entry):
+    def delete_entry(self, table, primary_key, primary_key_value):
         """_summary_
 
         Args:
@@ -157,9 +157,16 @@ class TrashButton:
         )
         buttons_container.grid(column=1, row=2, sticky="w", pady=(0, 15))
 
+        def delete_btn_callback():
+            table.delete({
+                f"{primary_key}": primary_key_value
+            })
+            overlay.destroy()
+            RouteManager.go_to(RouteManager.active)
+
         confirm_button = ctk.CTkButton(
             buttons_container,
-            command=lambda: print("Deletei"),
+            command=delete_btn_callback,
             fg_color=Colors.RED.c_500,
             hover_color=Colors.RED.c_700,
             text_color="#ffffff",

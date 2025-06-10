@@ -82,3 +82,9 @@ class Form:
             corner_radius=10
         )
         confirm_button.grid(row=i+1, column=0, ipady=5, sticky="w", padx=10, pady=(10, 10))
+    
+    def get_values(self):
+        values = {}
+        for input in self.inputs:
+            values[input.name] = input.get()
+        return values

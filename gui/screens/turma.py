@@ -94,18 +94,20 @@ class Classes(Screen):
 
         pagination = TablesManager.turmaTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_classes", "see_class")
+        table = Table(self.app, "edit_classes", TablesManager.turmaTable, "idturma", "see_class")
         table.build(pagination)
 
 
 class EditClass(Screen):
     def __init__(self, app):
         self.app = app
+
+        self.current_id = None
     
     def build(self, *args, **kwargs):
-        entry_library_class: pd.Series = args[0]
+        self.current_id = args[0]["idturma"]
         library_class = TablesManager.turmaTable.read_one(
-            idturma=entry_library_class["ID Turma"],
+            idturma=self.current_id,
         )
 
         title_frame = ctk.CTkFrame(
@@ -174,7 +176,11 @@ class EditClass(Screen):
         self.forms.build(self.send, library_class)
     
     def send(self):
-        pass
+        values = self.forms.get_values()
+        TablesManager.turmaTable.update({
+            "idturma": self.current_id,
+        },values)
+        RouteManager.go_back()
 
 
 class CreateClass(Screen):
@@ -248,7 +254,12 @@ class CreateClass(Screen):
         self.forms.build(self.send)
     
     def send(self):
-        pass
+        values = self.forms.get_values()
+        qtd = TablesManager.turmaTable.read(qtd=1,pagina=1)["total_registros"]
+        TablesManager.turmaTable.create({
+            "idturma": qtd+1,
+        },values)
+        RouteManager.go_back()
 
 
 class SeeClass(Screen):
@@ -257,6 +268,11 @@ class SeeClass(Screen):
 
     def build(self, *args, **kwargs):
         actual_class = args[0]
+
+        if len(args) >= 2 and args[1] is not None:
+            page = args[1]
+        else:
+            page = 1
 
         title_frame = ctk.CTkFrame(
             self.app,
@@ -305,16 +321,13 @@ class SeeClass(Screen):
         self.app.grid_rowconfigure(1, weight=1)
         self.app.grid_columnconfigure(0, weight=1)
 
-        students = pd.read_csv("gui/screens/csv/students.csv")
-        students = students[students["idturma"] == actual_class.idturma]
-
-        pagination = {
-            "registros": students,
-            "total_registros": len(students),
-            "registros_por_pagina": len(students),
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
+        pagination = TablesManager.alunoTable.read(
+            {
+                "idturma": actual_class.idturma
+            },
+            10,
+            page
+        )
 
         table = Table(self.app, "edit_students")
         table.build(pagination)

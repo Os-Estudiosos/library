@@ -8,12 +8,20 @@ from gui.manager.routemanager import RouteManager
 from gui.screens.components.table import Table
 from gui.screens.components.forms import Form
 
+from gui.manager.tablesmanager import TablesManager
+
 
 class Suspensions(Screen):
     def __init__(self, app):
         self.app = app
+        self.items_per_page=10
 
     def build(self, *args, **kwargs):
+        if args[0] is not None:
+            page = args[0]
+        else:
+            page = 1
+        
         title_frame = ctk.CTkFrame(
             self.app,
             fg_color="transparent"
@@ -80,18 +88,9 @@ class Suspensions(Screen):
 
         title_frame.grid(row=0, column=0, pady=10, padx=20, sticky="ew")
 
-        suspensions = pd.read_csv("gui/screens/csv/suspensions.csv")
+        pagination = TablesManager.suspensaoTable.read(qtd=self.items_per_page, pagina=page)
 
-        table = Table(self.app, "edit_suspensions")
-
-        pagination = {
-            "registros": suspensions.head(8),
-            "total_registros": 8,
-            "registros_por_pagina": 8,
-            "total_paginas": 1,
-            "pagina_atual": 1
-        }
-
+        table = Table(self.app, "edit_classes", "see_class")
         table.build(pagination)
 
 

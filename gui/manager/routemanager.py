@@ -1,6 +1,6 @@
 class RouteManager:
-    default = "students"  # A minha rota padrão
-    active = "students"  # Minha rota ativa
+    default = "classes"  # A minha rota padrão
+    active = "classses"  # Minha rota ativa
     routes = {  # Quais são as minhas rotas
 
     }
