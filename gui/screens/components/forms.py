@@ -64,6 +64,23 @@ class Form:
                             input.grid(row=1, column=0, sticky="ew")
                             if entry is not None:
                                 input.insert(entry[key])
+                        case "toggle":
+                            input = ctk.CTkSwitch(
+                                master=wrapper,
+                                text="",
+                                onvalue=1,
+                                offvalue=0,
+                                progress_color=Colors.INDIGO.c_600,
+                                button_color=Colors.GRAY.c_200,
+                                button_hover_color=Colors.GRAY.c_300
+                            )
+                            input.name = key
+                            input.grid(row=1, column=0, sticky="ew")
+                            if entry is not None:
+                                if entry[key]:
+                                    input.select()
+                                else:
+                                    input.deselect()
 
                     self.inputs.append(input)
                     wrapper.grid(row=i, column=j, padx=10, pady=(10, 0), sticky="ew")
